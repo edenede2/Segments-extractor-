@@ -121,7 +121,7 @@ def main():
             upper_bound = st.number_input('Enter Upper Bound for Outliers', value=data[selected_measurements].quantile(0.80))
 
         if st.button("Generate Plot"):
-           if selected_plot == "Line Plot":
+            if selected_plot == "Line Plot":
                 plot_line_3d(data, selected_subjects, selected_events, selected_measurements, lower_bound, upper_bound)
             elif selected_plot == "Box Plot":
                 plot_box(data, selected_subjects, selected_events, selected_measurements, x_var='Events', lower_bound=lower_bound, upper_bound=upper_bound)
