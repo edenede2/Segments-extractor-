@@ -96,61 +96,64 @@ def plot_facet(data, subjects, events, measure):
 def main():
     st.title("Visualization App for Total_segments_Val.csv")
     
-    # Directly read the CSV
-    data = pd.read_csv('Total_segments_Val.csv')
+    file_option = st.radio("Choose a CSV file source:", ["Use default file", "Upload my own file"])
     
-    st.write("Preview of the Data")
+    if file_option == "Use default file":
+        data = pd.read_csv('Total_segments_Val.csv')
+        st.write("Preview of the Default Data")
+    elif file_option == "Upload my own file":
+        uploaded_file = st.file_uploader("Upload a CSV file", type="csv")
+        if uploaded_file:
+            data = pd.read_csv(uploaded_file)
+            st.write("Preview of the Uploaded Data")
+        else:
+            st.warning("Please upload a CSV file.")
+            return  # This ensures the rest of the code doesn't run until a file is uploaded
+
     st.write(data.head())
 
-    uploaded_file = st.file_uploader("Choose a CSV file", type="csv")
-    if uploaded_file:
-        data = pd.read_csv(uploaded_file)
-        st.write("Preview of the Data")
-        st.write(data.head())
+    all_subjects = data['Subjects'].unique().tolist()
+    selected_subjects = st.multiselect('Select Subjects', all_subjects, default=all_subjects)
 
-        all_subjects = data['Subjects'].unique().tolist()
-        selected_subjects = st.multiselect('Select Subjects', all_subjects, default=all_subjects)
+    all_events = data['Events'].unique().tolist()
+    selected_events = st.multiselect('Select Events', all_events, default=all_events)
+    
+    # If specific events are selected, display segments relevant to those events
+    if selected_events:
+        filtered_data = data[data['Events'].isin(selected_events)]
+        relevant_segments = filtered_data['Segments'].unique().tolist()
+    else:
+        relevant_segments = data['Segments'].unique().tolist()
+    
+    selected_segments = st.multiselect('Select Segments', relevant_segments, default=relevant_segments)
 
-        all_events = data['Events'].unique().tolist()
-        selected_events = st.multiselect('Select Events', all_events, default=all_events)
-        
-        # If specific events are selected, display segments relevant to those events
-        if selected_events:
-            filtered_data = data[data['Events'].isin(selected_events)]
-            relevant_segments = filtered_data['Segments'].unique().tolist()
-        else:
-            relevant_segments = data['Segments'].unique().tolist()
-        
-        selected_segments = st.multiselect('Select Segments', relevant_segments, default=relevant_segments)
+    # ... [rest of the code remains unchanged]
 
-        # ... [rest of the code remains unchanged]
+    measurements = ['RMSSD', 'SDNN']
+    selected_measurements = st.selectbox('Select Measurements', measurements, index=0)
 
-        measurements = ['RMSSD', 'SDNN']
-        selected_measurements = st.selectbox('Select Measurements', measurements, index=0)
+    plot_types = ["Line Plot", "Line Plot 3d", "Box Plot", "Violin Plot", "Swarm Plot", "Facet Grid"]
+    selected_plot = st.selectbox('Select Visualization Type', plot_types)
 
-        plot_types = ["Line Plot", "Line Plot 3d", "Box Plot", "Violin Plot", "Swarm Plot", "Facet Grid"]
-        selected_plot = st.selectbox('Select Visualization Type', plot_types)
+    remove_outliers = st.checkbox("Remove Outliers", value=False)
+    lower_bound, upper_bound = None, None
+    if remove_outliers:
+        lower_bound = st.number_input('Enter Lower Bound for Outliers', value=data[selected_measurements].quantile(0.20))
+        upper_bound = st.number_input('Enter Upper Bound for Outliers', value=data[selected_measurements].quantile(0.80))
 
-        remove_outliers = st.checkbox("Remove Outliers", value=False)
-        lower_bound, upper_bound = None, None
-        if remove_outliers:
-            lower_bound = st.number_input('Enter Lower Bound for Outliers', value=data[selected_measurements].quantile(0.20))
-            upper_bound = st.number_input('Enter Upper Bound for Outliers', value=data[selected_measurements].quantile(0.80))
-
-        if st.button("Generate Plot"):
-            if selected_plot == "Line Plot":
-                plot_line(data, selected_subjects, selected_events, selected_measurements, lower_bound, upper_bound)
-            elif selected_plot == "Line Plot 3d":
-                plot_line_3d(data, selected_subjects, selected_events, selected_measurements, lower_bound, upper_bound)
-            elif selected_plot == "Box Plot":
-                plot_box(data, selected_subjects, selected_events, selected_measurements, x_var='Events', lower_bound=lower_bound, upper_bound=upper_bound)
-            elif selected_plot == "Violin Plot":
-                plot_violin(data, selected_subjects, selected_events, selected_measurements, x_var='Events', lower_bound=lower_bound, upper_bound=upper_bound)
-            elif selected_plot == "Swarm Plot":
-                plot_swarm(data, selected_subjects, selected_events, selected_measurements, x_var='Events', lower_bound=lower_bound, upper_bound=upper_bound)
-            elif selected_plot == "Facet Grid":
-                plot_facet(data, selected_subjects, selected_events, selected_measurements)
+    if st.button("Generate Plot"):
+        if selected_plot == "Line Plot":
+            plot_line(data, selected_subjects, selected_events, selected_measurements, lower_bound, upper_bound)
+        elif selected_plot == "Line Plot 3d":
+            plot_line_3d(data, selected_subjects, selected_events, selected_measurements, lower_bound, upper_bound)
+        elif selected_plot == "Box Plot":
+            plot_box(data, selected_subjects, selected_events, selected_measurements, x_var='Events', lower_bound=lower_bound, upper_bound=upper_bound)
+        elif selected_plot == "Violin Plot":
+            plot_violin(data, selected_subjects, selected_events, selected_measurements, x_var='Events', lower_bound=lower_bound, upper_bound=upper_bound)
+        elif selected_plot == "Swarm Plot":
+            plot_swarm(data, selected_subjects, selected_events, selected_measurements, x_var='Events', lower_bound=lower_bound, upper_bound=upper_bound)
+        elif selected_plot == "Facet Grid":
+            plot_facet(data, selected_subjects, selected_events, selected_measurements)
 
 if __name__ == "__main__":
     main()
-
