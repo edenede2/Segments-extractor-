@@ -28,8 +28,8 @@ def plot_line_3d(data, subjects, events, measure, lower_bound, upper_bound):
     
     fig.update_layout(scene=dict(
             xaxis_title='Segments',
-            yaxis_title=measure,
-            zaxis_title='Events'
+            yaxis_title='Events',
+            zaxis_title=measure
         ),
         title=f"{measure} across Events for selected subjects in 3D"
     )
@@ -172,31 +172,31 @@ def main():
         elif selected_plot == "Facet Grid":
             plot_facet(filtered_data, selected_subjects, selected_events, selected_measurements)
 
-st.markdown("## Visualization for Full Data")
+    st.markdown("## Visualization for Full Data")
  
-full_data = data[data['Subjects'].str.startswith('Full_')]
+    full_data = data[data['Subjects'].str.startswith('Full_')]
 
-full_measurements = ['RMSSD', 'SDNN', 'MHR']
-selected_full_measurement = st.selectbox('Select Measurement for Full Data', full_measurements)
+    full_measurements = ['RMSSD', 'SDNN', 'MHR']
+    selected_full_measurement = st.selectbox('Select Measurement for Full Data', full_measurements)
 
-full_plot_types = ["Box Plot", "Violin Plot", "Histogram", "Swarm Plot"]
-selected_full_plot = st.selectbox('Select Visualization Type for Full Data', full_plot_types)
+    full_plot_types = ["Box Plot", "Violin Plot", "Histogram", "Swarm Plot"]
+    selected_full_plot = st.selectbox('Select Visualization Type for Full Data', full_plot_types)
 
-all_full_events = full_data['Events'].unique().tolist()
-selected_full_events = st.multiselect('Select Events for Full Data', all_full_events, default=all_full_events)
+    all_full_events = full_data['Events'].unique().tolist()
+    selected_full_events = st.multiselect('Select Events for Full Data', all_full_events, default=all_full_events)
 
-filtered_full_data = full_data[full_data['Events'].isin(selected_full_events)]
+    filtered_full_data = full_data[full_data['Events'].isin(selected_full_events)]
 
-if st.button("Generate Full Data Plot"):
-    # Depending on the type of plot selected, call the appropriate function
-    if selected_full_plot == "Box Plot":
-        plot_full_data_box(full_data, selected_full_measurement)
-    elif selected_full_plot == "Violin Plot":
-        plot_full_data_violin(full_data, selected_full_measurement)
-    elif selected_full_plot == "Histogram":
-        plot_full_data_histogram(full_data, selected_full_measurement)
-    elif selected_full_plot == "Swarm Plot":
-        plot_full_data_swarm(full_data, selected_full_measurement)
+    if st.button("Generate Full Data Plot"):
+        # Depending on the type of plot selected, call the appropriate function
+        if selected_full_plot == "Box Plot":
+            plot_full_data_box(full_data, selected_full_measurement)
+        elif selected_full_plot == "Violin Plot":
+            plot_full_data_violin(full_data, selected_full_measurement)
+        elif selected_full_plot == "Histogram":
+            plot_full_data_histogram(full_data, selected_full_measurement)
+        elif selected_full_plot == "Swarm Plot":
+            plot_full_data_swarm(full_data, selected_full_measurement)
 
 if __name__ == "__main__":
     main()
