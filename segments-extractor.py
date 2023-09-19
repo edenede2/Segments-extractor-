@@ -3,6 +3,7 @@ import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 import plotly.express as px
+import plotly.graph_objects as go
 
 import warnings
 warnings.filterwarnings("ignore", category=FutureWarning)
@@ -28,23 +29,24 @@ def plot_box(data, subjects, events, measure, x_var='Subjects', lower_bound=None
     if lower_bound and upper_bound:
         data_subset = data_subset[(data_subset[measure] >= lower_bound) & (data_subset[measure] <= upper_bound)]
 
-    plt.figure(figsize=(14, 7))
-    sns.boxplot(data=data_subset, x=x_var, y=measure, hue='Events')
-    plt.title(f"Box plot of {measure} across {x_var}")
-    st.pyplot()
-    plt.close()
+    fig = go.Figure()
 
+    for event in selected_events:
+        event_data = data_subset[data_subset['Events'] == event]
+        fig.add_trace(go.Box(y=event_data[measure], x=event_data[x_var], name=event, boxpoints='all', jitter=0.3, pointpos=-1.8))
+        
+    fig.update_layout(title=f"Box plot of {measure} across {x_var}", xaxis_title=x_var, yaxis_title=measure)
+    st.plotly_chart(fig)
+    
 def plot_violin(data, subjects, events, measure, x_var='Subjects', lower_bound=None, upper_bound=None):
     data_subset = data[data['Subjects'].isin(subjects) & data['Events'].isin(events)]
     
     if lower_bound and upper_bound:
         data_subset = data_subset[(data_subset[measure] >= lower_bound) & (data_subset[measure] <= upper_bound)]
 
-    plt.figure(figsize=(14, 7))
-    sns.violinplot(data=data_subset, x=x_var, y=measure, hue='Events')
-    plt.title(f"Violin plot of {measure} across {x_var}")
-    st.pyplot()
-    plt.close()
+    fig = px.violin(data_subset, x=x_var, y=measure, color='Events', box=True, points="all", hover_data=['Subjects', 'Events'])
+    st.plotly_chart(fig)
+
     
 def plot_swarm(data, subjects, events, measure, x_var='Subjects', lower_bound=None, upper_bound=None):
     data_subset = data[data['Subjects'].isin(subjects) & data['Events'].isin(events)]
@@ -60,10 +62,9 @@ def plot_swarm(data, subjects, events, measure, x_var='Subjects', lower_bound=No
 
 def plot_facet(data, subjects, events, measure):
     data_subset = data[data['Subjects'].isin(subjects) & data['Events'].isin(events)]
-    g = sns.FacetGrid(data_subset, col="Subjects", col_wrap=4, height=4)
-    g = g.map(plt.plot, 'Segments', measure).add_legend()
-    st.pyplot()
-    plt.close()
+    fig = px.line(data_subset, x='Segments', y=measure, color='Events', facet_col='Subjects', hover_data=['Subjects', 'Events'])
+    st.plotly_chart(fig)
+
 
 # ... [other parts of the code remain unchanged]
 
