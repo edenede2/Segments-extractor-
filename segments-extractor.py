@@ -4,7 +4,7 @@ import os
 import glob
 
 # Constants
-REPO_PATH = "/edenede2/Segments-extractor-/tree/main"  # Replace with your repository name
+REPO_PATH = "Segments-extractor-/tree/main"  # Replace with your repository name
 TOTAL_SEGMENTS_FILE = os.path.join(REPO_PATH, "Total_segments_Val.csv")
 
 def extract_data_from_hrv_file_corrected(hrv_file):
