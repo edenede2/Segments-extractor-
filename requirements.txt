@@ -1,5 +1,4 @@
-seaborn
-streamlit
-pandas
-openpyxl
-
+seaborn==0.11.1
+streamlit==0.89.0
+pandas==1.3.3
+openpyxl==3.0.7
