@@ -21,14 +21,14 @@ def plot_line_3d(data, subjects, events, measure, lower_bound, upper_bound):
     for event in events:
         event_data = data_subset[data_subset['Events'] == event]
         fig.add_trace(go.Scatter3d(x=event_data['Segments'], 
-                                   y=event_data['subjects'],
+                                   y=event_data[measure],
                                    z=event_data['Events'].astype(str),  # Convert event to string for plotting
                                    mode='lines',
                                    name=event))
     
     fig.update_layout(scene=dict(
             xaxis_title='Segments',
-            yaxis_title='subjects',
+            yaxis_title=measure,
             zaxis_title='Events'
         ),
         title=f"{measure} across Events for selected subjects in 3D"
