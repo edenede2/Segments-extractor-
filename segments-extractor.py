@@ -76,9 +76,14 @@ def main():
 
         all_events = data['Events'].unique().tolist()
         selected_events = st.multiselect('Select Events', all_events, default=all_events)
-
-        all_segments = data['Segments'].unique().tolist()
-        selected_segments = st.multiselect('Select Segments', all_segments, default=all_segments)
+        
+        # Filter the data based on selected subjects and events
+        filtered_data = data[data['Subjects'].isin(selected_subjects) & data['Events'].isin(selected_events)]
+        
+        # Extract unique segments from the filtered data
+        relevant_segments = filtered_data['Segments'].unique().tolist()
+        
+        selected_segments = st.multiselect('Select Segments', relevant_segments, default=relevant_segments)
 
         measurements = ['RMSSD', 'SDNN']
         selected_measurements = st.selectbox('Select Measurements', measurements, index=0)
