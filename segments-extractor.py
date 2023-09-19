@@ -9,8 +9,6 @@ import warnings
 warnings.filterwarnings("ignore", category=FutureWarning)
 
 
-import plotly.graph_objects as go
-
 def plot_line_3d(data, subjects, events, measure, lower_bound, upper_bound):
     data_subset = data[data['Subjects'].isin(subjects) & data['Events'].isin(events)]
     
