@@ -90,8 +90,28 @@ def plot_facet(data, subjects, events, measure):
     fig = px.line(data_subset, x='Segments', y=measure, color='Events', facet_col='Subjects', hover_data=['Subjects', 'Events'])
     st.plotly_chart(fig)
 
+def plot_full_data_bar(data, measure):
+    fig = px.bar(data, x='Subjects', y=measure, color='Events', title=f"{measure} for Full Subjects")
+    st.plotly_chart(fig)
 
-# ... [other parts of the code remain unchanged]
+def plot_full_data_box(data, measure):
+    fig = px.box(data, x='Events', y=measure, title=f"Box Plot of {measure} for Full Subjects")
+    st.plotly_chart(fig)
+
+def plot_full_data_violin(data, measure):
+    fig = px.violin(data, x='Events', y=measure, box=True, points="all", title=f"Violin Plot of {measure} for Full Subjects")
+    st.plotly_chart(fig)
+
+def plot_full_data_histogram(data, measure):
+    fig = px.histogram(data, x=measure, color='Events', title=f"Histogram of {measure} for Full Subjects")
+    st.plotly_chart(fig)
+
+def plot_full_data_swarm(data, measure):
+    plt.figure(figsize=(14, 7))
+    sns.swarmplot(data=data, x='Events', y=measure)
+    plt.title(f"Swarm plot of {measure} for Full Subjects")
+    st.pyplot()
+    plt.close()
 
 def main():
     st.title("Visualization App for Total_segments_Val.csv")
@@ -100,6 +120,7 @@ def main():
     
     if file_option == "Use default file":
         data = pd.read_csv('Total_segments_Val.csv')
+        full_data = data[data['Subjects'].str.startswith("Full_")]
         st.write("Preview of the Default Data")
     elif file_option == "Upload my own file":
         uploaded_file = st.file_uploader("Upload a CSV file", type="csv")
@@ -150,6 +171,32 @@ def main():
             plot_swarm(filtered_data, selected_subjects, selected_events, selected_measurements, x_var='Events', lower_bound=lower_bound, upper_bound=upper_bound)
         elif selected_plot == "Facet Grid":
             plot_facet(filtered_data, selected_subjects, selected_events, selected_measurements)
+
+st.markdown("## Visualization for Full Data")
+ 
+full_data = data[data['Subjects'].str.startswith('Full_')]
+
+full_measurements = ['RMSSD', 'SDNN', 'MHR']
+selected_full_measurement = st.selectbox('Select Measurement for Full Data', full_measurements)
+
+full_plot_types = ["Box Plot", "Violin Plot", "Histogram", "Swarm Plot"]
+selected_full_plot = st.selectbox('Select Visualization Type for Full Data', full_plot_types)
+
+all_full_events = full_data['Events'].unique().tolist()
+selected_full_events = st.multiselect('Select Events for Full Data', all_full_events, default=all_full_events)
+
+filtered_full_data = full_data[full_data['Events'].isin(selected_full_events)]
+
+if st.button("Generate Full Data Plot"):
+    # Depending on the type of plot selected, call the appropriate function
+    if selected_full_plot == "Box Plot":
+        plot_full_data_box(full_data, selected_full_measurement)
+    elif selected_full_plot == "Violin Plot":
+        plot_full_data_violin(full_data, selected_full_measurement)
+    elif selected_full_plot == "Histogram":
+        plot_full_data_histogram(full_data, selected_full_measurement)
+    elif selected_full_plot == "Swarm Plot":
+        plot_full_data_swarm(full_data, selected_full_measurement)
 
 if __name__ == "__main__":
     main()
