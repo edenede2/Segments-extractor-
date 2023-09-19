@@ -81,7 +81,7 @@ def process_files():
 # Streamlit App
 st.title("HRV Data Extractor from GitHub Repository")
 
-if st.button("Process and Append Data"):
+if st.button("Process and Append Data from GitHub", key='github'):
     result_data = process_files()
     st.write(result_data)
     st.download_button("Download Updated Total Segments File", TOTAL_SEGMENTS_FILE, "Total_segments_Val_updated.csv")
@@ -102,7 +102,7 @@ hrv_file = st.file_uploader("Upload your HRV Analysis Excel file")
 total_segments_file = st.file_uploader("Upload your Total Segments csv file")
 
 # Button to trigger data extraction and append
-if st.button("Process and Append Data"):
+if st.button("Process and Append Data from Uploaded Files", key='upload'):
     if hrv_file and total_segments_file:
         # Convert the uploaded files to DataFrames
         hrv_data_df = pd.read_excel(hrv_file)
