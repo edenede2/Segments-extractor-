@@ -119,14 +119,10 @@ def main():
     selected_events = st.multiselect('Select Events', all_events, default=all_events)
     
     # If specific events are selected, display segments relevant to those events
-    if selected_events:
-        filtered_data = data[data['Events'].isin(selected_events)]
-        relevant_segments = filtered_data['Segments'].unique().tolist()
-    else:
-        relevant_segments = data['Segments'].unique().tolist()
-    
+     # Filter segments based on selected subjects and events
+    filtered_data = data[(data['Subjects'].isin(selected_subjects)) & (data['Events'].isin(selected_events))]
+    relevant_segments = filtered_data['Segments'].unique().tolist()
     selected_segments = st.multiselect('Select Segments', relevant_segments, default=relevant_segments)
-
     # ... [rest of the code remains unchanged]
 
     measurements = ['RMSSD', 'SDNN']
@@ -143,17 +139,17 @@ def main():
 
     if st.button("Generate Plot"):
         if selected_plot == "Line Plot":
-            plot_line(data, selected_subjects, selected_events, selected_measurements, lower_bound, upper_bound)
+            plot_line(filtered_data, selected_subjects, selected_events, selected_measurements, lower_bound, upper_bound)
         elif selected_plot == "Line Plot 3d":
-            plot_line_3d(data, selected_subjects, selected_events, selected_measurements, lower_bound, upper_bound)
+            plot_line_3d(filtered_data, selected_subjects, selected_events, selected_measurements, lower_bound, upper_bound)
         elif selected_plot == "Box Plot":
-            plot_box(data, selected_subjects, selected_events, selected_measurements, x_var='Events', lower_bound=lower_bound, upper_bound=upper_bound)
+            plot_box(filtered_data, selected_subjects, selected_events, selected_measurements, x_var='Events', lower_bound=lower_bound, upper_bound=upper_bound)
         elif selected_plot == "Violin Plot":
-            plot_violin(data, selected_subjects, selected_events, selected_measurements, x_var='Events', lower_bound=lower_bound, upper_bound=upper_bound)
+            plot_violin(filtered_data, selected_subjects, selected_events, selected_measurements, x_var='Events', lower_bound=lower_bound, upper_bound=upper_bound)
         elif selected_plot == "Swarm Plot":
-            plot_swarm(data, selected_subjects, selected_events, selected_measurements, x_var='Events', lower_bound=lower_bound, upper_bound=upper_bound)
+            plot_swarm(filtered_data, selected_subjects, selected_events, selected_measurements, x_var='Events', lower_bound=lower_bound, upper_bound=upper_bound)
         elif selected_plot == "Facet Grid":
-            plot_facet(data, selected_subjects, selected_events, selected_measurements)
+            plot_facet(filtered_data, selected_subjects, selected_events, selected_measurements)
 
 if __name__ == "__main__":
     main()
