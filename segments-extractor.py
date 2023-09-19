@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
+import plotly.express as px
 
 import warnings
 warnings.filterwarnings("ignore", category=FutureWarning)
@@ -13,11 +14,13 @@ def plot_line(data, subjects, events, measure, lower_bound, upper_bound):
     if lower_bound and upper_bound:
         data_subset = data_subset[(data_subset[measure] >= lower_bound) & (data_subset[measure] <= upper_bound)]
     
-    plt.figure(figsize=(14, 7))
-    sns.lineplot(data=data_subset, x='Segments', y=measure, hue='Events', style='Subjects')
-    plt.title(f"{measure} across Events for selected subjects")
-    st.pyplot()
-    plt.close()
+    fig = px.line(data_subset, x='Segments', y=measure, color='Events', line_dash='Subjects', 
+                  title=f"{measure} across Events for selected subjects", 
+                  labels={'Segments': 'Segments', measure: measure}, 
+                  hover_data=['Subjects', 'Events'])
+
+    st.plotly_chart(fig)
+
 
 def plot_box(data, subjects, events, measure, x_var='Subjects', lower_bound=None, upper_bound=None):
     data_subset = data[data['Subjects'].isin(subjects) & data['Events'].isin(events)]
