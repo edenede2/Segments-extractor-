@@ -62,6 +62,8 @@ def plot_facet(data, subjects, events, measure):
     st.pyplot()
     plt.close()
 
+# ... [other parts of the code remain unchanged]
+
 def main():
     st.title("Visualization App for Total_segments_Val.csv")
 
@@ -77,13 +79,16 @@ def main():
         all_events = data['Events'].unique().tolist()
         selected_events = st.multiselect('Select Events', all_events, default=all_events)
         
-        # Filter the data based on selected subjects and events
-        filtered_data = data[data['Subjects'].isin(selected_subjects) & data['Events'].isin(selected_events)]
-        
-        # Extract unique segments from the filtered data
-        relevant_segments = filtered_data['Segments'].unique().tolist()
+        # If specific events are selected, display segments relevant to those events
+        if selected_events:
+            filtered_data = data[data['Events'].isin(selected_events)]
+            relevant_segments = filtered_data['Segments'].unique().tolist()
+        else:
+            relevant_segments = data['Segments'].unique().tolist()
         
         selected_segments = st.multiselect('Select Segments', relevant_segments, default=relevant_segments)
+
+        # ... [rest of the code remains unchanged]
 
         measurements = ['RMSSD', 'SDNN']
         selected_measurements = st.selectbox('Select Measurements', measurements, index=0)
