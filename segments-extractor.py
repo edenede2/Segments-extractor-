@@ -143,6 +143,7 @@ def main():
      # Filter segments based on selected subjects and events
     filtered_data = data[(data['Subjects'].isin(selected_subjects)) & (data['Events'].isin(selected_events))]
     relevant_segments = filtered_data['Segments'].unique().tolist()
+    selected_segments = relevant_segments
     selected_segments = st.multiselect('Select Segments', relevant_segments, default=[s for s in selected_segments if s in relevant_segments])
     filtered_data = filtered_data[filtered_data['Segments'].isin(selected_segments)]
 
