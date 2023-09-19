@@ -35,7 +35,18 @@ def plot_line_3d(data, subjects, events, measure, lower_bound, upper_bound):
     )
     st.plotly_chart(fig)
 
+def plot_line(data, subjects, events, measure, lower_bound, upper_bound):
+    data_subset = data[data['Subjects'].isin(subjects) & data['Events'].isin(events)]
+    
+    if lower_bound and upper_bound:
+        data_subset = data_subset[(data_subset[measure] >= lower_bound) & (data_subset[measure] <= upper_bound)]
+    
+    fig = px.line(data_subset, x='Segments', y=measure, color='Events', line_dash='Subjects', 
+                  title=f"{measure} across Events for selected subjects", 
+                  labels={'Segments': 'Segments', measure: measure}, 
+                  hover_data=['Subjects', 'Events'])
 
+    st.plotly_chart(fig)
 
 def plot_box(data, subjects, events, measure, x_var='Subjects', lower_bound=None, upper_bound=None):
     data_subset = data[data['Subjects'].isin(subjects) & data['Events'].isin(events)]
@@ -121,6 +132,8 @@ def main():
             upper_bound = st.number_input('Enter Upper Bound for Outliers', value=data[selected_measurements].quantile(0.80))
 
         if st.button("Generate Plot"):
+            if selected_plot == "Line Plot":
+                plot_line(data, subjects, events, measure, lower_bound, upper_bound)
             if selected_plot == "Line Plot 3d":
                 plot_line_3d(data, selected_subjects, selected_events, selected_measurements, lower_bound, upper_bound)
             elif selected_plot == "Box Plot":
