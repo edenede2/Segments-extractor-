@@ -16,7 +16,7 @@ def plot_line(data, subjects, events, measure, lower_bound, upper_bound):
     plt.figure(figsize=(14, 7))
     sns.lineplot(data=data_subset, x='Segments', y=measure, hue='Events', style='Subjects')
     plt.title(f"{measure} across Events for selected subjects")
-    plt.show()
+    st.pyplot()
     plt.close()
 
 def plot_box(data, subjects, events, measure, x_var='Subjects', lower_bound=None, upper_bound=None):
@@ -28,7 +28,7 @@ def plot_box(data, subjects, events, measure, x_var='Subjects', lower_bound=None
     plt.figure(figsize=(14, 7))
     sns.boxplot(data=data_subset, x=x_var, y=measure, hue='Events')
     plt.title(f"Box plot of {measure} across {x_var}")
-    plt.show()
+    st.pyplot()
     plt.close()
 
 def plot_violin(data, subjects, events, measure, x_var='Subjects', lower_bound=None, upper_bound=None):
@@ -40,7 +40,7 @@ def plot_violin(data, subjects, events, measure, x_var='Subjects', lower_bound=N
     plt.figure(figsize=(14, 7))
     sns.violinplot(data=data_subset, x=x_var, y=measure, hue='Events')
     plt.title(f"Violin plot of {measure} across {x_var}")
-    plt.show()
+    st.pyplot()
     plt.close()
     
 def plot_swarm(data, subjects, events, measure, x_var='Subjects', lower_bound=None, upper_bound=None):
@@ -52,14 +52,14 @@ def plot_swarm(data, subjects, events, measure, x_var='Subjects', lower_bound=No
     plt.figure(figsize=(14, 7))
     sns.swarmplot(data=data_subset, x=x_var, y=measure, hue='Events')
     plt.title(f"Swarm plot of {measure} across {x_var}")
-    plt.show()
+    st.pyplot()
     plt.close()
 
 def plot_facet(data, subjects, events, measure):
     data_subset = data[data['Subjects'].isin(subjects) & data['Events'].isin(events)]
     g = sns.FacetGrid(data_subset, col="Subjects", col_wrap=4, height=4)
     g = g.map(plt.plot, 'Segments', measure).add_legend()
-    plt.show()
+    st.pyplot()
     plt.close()
 
 def main():
