@@ -99,18 +99,18 @@ st.title("HRV Data Extractor")
 hrv_file = st.file_uploader("Upload your HRV Analysis Excel file")
 
 # Upload Total Segments file
-total_segments_file = st.file_uploader("Upload your Total Segments Excel file")
+total_segments_file = st.file_uploader("Upload your Total Segments csv file")
 
 # Button to trigger data extraction and append
 if st.button("Process and Append Data"):
     if hrv_file and total_segments_file:
         # Convert the uploaded files to DataFrames
         hrv_data_df = pd.read_excel(hrv_file)
-        total_segments_df = pd.read_excel(total_segments_file)
+        total_segments_df = pd.read_csv(total_segments_file)
 
         # Save the uploaded DataFrames to temporary files to use them in the function
         hrv_file_path = "/tmp/hrv_temp_file.xlsx"
-        total_segments_file_path = "/tmp/total_segments_temp_file.xlsx"
+        total_segments_file_path = "/tmp/total_segments_temp_file.csv"
         
         hrv_data_df.to_excel(hrv_file_path, index=False)
         total_segments_df.to_excel(total_segments_file_path, index=False)
