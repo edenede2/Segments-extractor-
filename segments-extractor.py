@@ -9,18 +9,34 @@ import warnings
 warnings.filterwarnings("ignore", category=FutureWarning)
 
 
-def plot_line(data, subjects, events, measure, lower_bound, upper_bound):
+import plotly.graph_objects as go
+
+def plot_line_3d(data, subjects, events, measure, lower_bound, upper_bound):
     data_subset = data[data['Subjects'].isin(subjects) & data['Events'].isin(events)]
     
     if lower_bound and upper_bound:
         data_subset = data_subset[(data_subset[measure] >= lower_bound) & (data_subset[measure] <= upper_bound)]
     
-    fig = px.line(data_subset, x='Segments', y=measure, color='Events', line_dash='Subjects', 
-                  title=f"{measure} across Events for selected subjects", 
-                  labels={'Segments': 'Segments', measure: measure}, 
-                  hover_data=['Subjects', 'Events'])
-
+    fig = go.Figure()
+    
+    # Iterate through each event to plot separate lines
+    for event in events:
+        event_data = data_subset[data_subset['Events'] == event]
+        fig.add_trace(go.Scatter3d(x=event_data['Segments'], 
+                                   y=event_data[measure],
+                                   z=event_data['Events'].astype(str),  # Convert event to string for plotting
+                                   mode='lines',
+                                   name=event))
+    
+    fig.update_layout(scene=dict(
+            xaxis_title='Segments',
+            yaxis_title=measure,
+            zaxis_title='Events'
+        ),
+        title=f"{measure} across Events for selected subjects in 3D"
+    )
     st.plotly_chart(fig)
+
 
 
 def plot_box(data, subjects, events, measure, x_var='Subjects', lower_bound=None, upper_bound=None):
