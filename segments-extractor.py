@@ -123,9 +123,9 @@ def main():
     filtered_data = data[(data['Subjects'].isin(selected_subjects)) & (data['Events'].isin(selected_events))]
     relevant_segments = filtered_data['Segments'].unique().tolist()
     selected_segments = st.multiselect('Select Segments', relevant_segments, default=relevant_segments)
-    # ... [rest of the code remains unchanged]
+    filtered_data = filtered_data[filtered_data['Segments'].isin(selected_segments)]
 
-    measurements = ['RMSSD', 'SDNN']
+    measurements = ['RMSSD', 'SDNN','MHR']
     selected_measurements = st.selectbox('Select Measurements', measurements, index=0)
 
     plot_types = ["Line Plot", "Line Plot 3d", "Box Plot", "Violin Plot", "Swarm Plot", "Facet Grid"]
