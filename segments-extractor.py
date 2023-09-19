@@ -45,7 +45,7 @@ def plot_box(data, subjects, events, measure, x_var='Subjects', lower_bound=None
 
     fig = go.Figure()
 
-    for event in selected_events:
+    for event in events:  # corrected variable here
         event_data = data_subset[data_subset['Events'] == event]
         fig.add_trace(go.Box(y=event_data[measure], x=event_data[x_var], name=event, boxpoints='all', jitter=0.3, pointpos=-1.8))
         
