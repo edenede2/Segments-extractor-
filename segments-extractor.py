@@ -1,7 +1,13 @@
 import streamlit as st
 import pandas as pd
+import os
+import glob
 
-def extract_data_from_hrv_file_corrected(hrv_file, total_segments_file):
+# Constants
+REPO_PATH = "/edenede2/Segments-extractor-/tree/main"  # Replace with your repository name
+TOTAL_SEGMENTS_FILE = os.path.join(REPO_PATH, "Total_segments_Val.csv")
+
+def extract_data_from_hrv_file_corrected(hrv_file):
     # Read the HRV data
     hrv_data = pd.read_excel(hrv_file)
     
@@ -52,9 +58,38 @@ def extract_data_from_hrv_file_corrected(hrv_file, total_segments_file):
     
     return total_segments_data
 
-# Test the corrected function
-result_data_corrected = extract_data_from_hrv_file_corrected("sub_001_HRV Analysis_18_53_56.xlsx", "Total_segments_Val.csv")
-result_data_corrected
+def process_files():
+    # Identify all files in the repo directory
+    all_files = glob.glob(os.path.join(REPO_PATH, "*"))
+    
+    # Filter out the Total_segments_Val.csv file
+    hrv_files = [file for file in all_files if not file.endswith("Total_segments_Val.csv")]
+    
+    # Read the Total_segments_Val.csv file
+    total_segments_data = pd.read_csv(TOTAL_SEGMENTS_FILE)
+    
+    # Process each HRV file
+    for hrv_file in hrv_files:
+        extracted_data = extract_data_from_hrv_file(hrv_file)
+        total_segments_data = total_segments_data.append(extracted_data, ignore_index=True)
+    
+    # Save the updated total_segments_data back to the file
+    total_segments_data.to_csv(TOTAL_SEGMENTS_FILE, index=False)
+    
+    return total_segments_data
+
+# Streamlit App
+st.title("HRV Data Extractor from GitHub Repository")
+
+if st.button("Process and Append Data"):
+    result_data = process_files()
+    st.write(result_data)
+    st.download_button("Download Updated Total Segments File", TOTAL_SEGMENTS_FILE, "Total_segments_Val_updated.csv")
+
+# Note: Before running the app, make sure to clone your GitHub repository to the local environment.
+# You can do this manually or add a git clone command in your deployment script.
+
+
 
 
 # Streamlit app code
