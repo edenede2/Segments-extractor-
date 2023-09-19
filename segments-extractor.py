@@ -95,6 +95,12 @@ def plot_facet(data, subjects, events, measure):
 
 def main():
     st.title("Visualization App for Total_segments_Val.csv")
+    
+    # Directly read the CSV
+    data = pd.read_csv('Total_segments_Val.csv')
+    
+    st.write("Preview of the Data")
+    st.write(data.head())
 
     uploaded_file = st.file_uploader("Choose a CSV file", type="csv")
     if uploaded_file:
