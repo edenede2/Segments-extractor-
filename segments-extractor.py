@@ -91,12 +91,12 @@ def plot_facet(data, subjects, events, measure):
     st.plotly_chart(fig)
     
 def plot_full_line_plot(data, measure):
-    fig = px.line(data, x='Events', y=measure, color='Events', line_dash='Subjects', 
-                  title=f"{measure} across Events for selected subjects", 
-                  labels={measure: measure}, 
+    fig = px.line(data, x='Events', y=measure, color='Subjects', 
+                  title=f"{measure} across Events for full subjects", 
+                  labels={'Events': 'Events', measure: measure}, 
                   hover_data=['Subjects', 'Events'])
-
     st.plotly_chart(fig)
+
 
 def plot_full_data_bar(data, measure):
     fig = px.bar(data, x='Subjects', y=measure, color='Events', title=f"{measure} for Full Subjects")
@@ -209,9 +209,9 @@ def main():
             plot_full_data_histogram(filtered_full_data, selected_full_measurement)
         elif selected_full_plot == "Swarm Plot":
             plot_full_data_swarm(filtered_full_data, selected_full_measurement)
-        elif selected_plot == "Plot Line":
-            plot_full_line_plot(filtered_full_data, selected_full_measurements)
-
+        elif selected_full_plot == "Plot Line":
+            plot_full_line_plot(filtered_full_data, selected_full_measurement)
+            
 if __name__ == "__main__":
     main()
 
