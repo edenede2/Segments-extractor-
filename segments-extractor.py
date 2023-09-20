@@ -89,6 +89,14 @@ def plot_facet(data, subjects, events, measure):
     data_subset = data[data['Subjects'].isin(subjects) & data['Events'].isin(events)]
     fig = px.line(data_subset, x='Segments', y=measure, color='Events', facet_col='Subjects', hover_data=['Subjects', 'Events'])
     st.plotly_chart(fig)
+    
+def plot_full_line_plot(data, measure):
+    fig = px.line(data, x='Events', y=measure, color='Events', line_dash='Subjects', 
+                  title=f"{measure} across Events for selected subjects", 
+                  labels={measure: measure}, 
+                  hover_data=['Subjects', 'Events'])
+
+    st.plotly_chart(fig)
 
 def plot_full_data_bar(data, measure):
     fig = px.bar(data, x='Subjects', y=measure, color='Events', title=f"{measure} for Full Subjects")
@@ -184,7 +192,7 @@ def main():
     selected_full_subjects = st.multiselect('Select Full Subjects', all_full_subjects, default=all_full_subjects)
     selected_full_measurement = st.selectbox('Select Measurement for Full Data', full_measurements)
 
-    full_plot_types = ["Box Plot", "Violin Plot", "Histogram", "Swarm Plot"]
+    full_plot_types = ["Box Plot", "Violin Plot", "Histogram", "Swarm Plot", "Plot Line"]
     selected_full_plot = st.selectbox('Select Visualization Type for Full Data', full_plot_types)
     
     all_full_events = full_data['Events'].unique().tolist()
@@ -201,6 +209,8 @@ def main():
             plot_full_data_histogram(filtered_full_data, selected_full_measurement)
         elif selected_full_plot == "Swarm Plot":
             plot_full_data_swarm(filtered_full_data, selected_full_measurement)
+        elif selected_plot == "Plot Line":
+            plot_full_line_plot(filtered_full_data, selected_full_measurements)
 
 if __name__ == "__main__":
     main()
