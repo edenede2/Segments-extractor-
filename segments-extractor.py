@@ -161,7 +161,7 @@ def main():
     measurements = ['RMSSD', 'SDNN','MHR']
     selected_measurements = st.selectbox('Select Measurements', measurements, index=0)
 
-    plot_types = ["Line Plot", "(not ready) Line Plot 3d", "Box Plot", "Violin Plot", "Swarm Plot", "Facet Grid"]
+    plot_types = ["Line Plot", "(corrected) Line Plot 3d", "Box Plot", "Violin Plot", "Swarm Plot", "Facet Grid"]
     selected_plot = st.selectbox('Select Visualization Type', plot_types)
 
     remove_outliers = st.checkbox("Remove Outliers", value=False)
@@ -173,7 +173,7 @@ def main():
     if st.button("Generate Plot"):
         if selected_plot == "Line Plot":
             plot_line(filtered_data, selected_segmented_subjects, selected_events, selected_measurements, lower_bound, upper_bound)
-        elif selected_plot == "(not ready) Line Plot 3d":
+        elif selected_plot == "(corrected) Line Plot 3d":
             plot_line_3d(filtered_data, selected_segmented_subjects, selected_events, selected_measurements, lower_bound, upper_bound)
         elif selected_plot == "Box Plot":
             plot_box(filtered_data, selected_segmented_subjects, selected_events, selected_measurements, x_var='Events', lower_bound=lower_bound, upper_bound=upper_bound)
