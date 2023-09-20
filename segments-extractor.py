@@ -17,23 +17,24 @@ def plot_line_3d(data, subjects, events, measure, lower_bound, upper_bound):
     
     fig = go.Figure()
     
-    # Iterate through each event to plot separate lines
-    for event in events:
-        event_data = data_subset[data_subset['Events'] == event]
-        fig.add_trace(go.Scatter3d(x=event_data['Segments'], 
-                                   y=event_data[measure],
-                                   z=event_data['Events'].astype(str),  # Convert event to string for plotting
+    # Iterate through each subject to plot separate lines
+    for subject in subjects:
+        subject_data = data_subset[data_subset['Subjects'] == subject]
+        fig.add_trace(go.Scatter3d(x=[subject]*len(subject_data),  # Setting constant x value for each subject
+                                   y=subject_data['Events'],
+                                   z=subject_data[measure],
                                    mode='lines',
-                                   name=event))
+                                   name=subject))
     
     fig.update_layout(scene=dict(
-            xaxis_title='Segments',
+            xaxis_title='Subjects',
             yaxis_title='Events',
             zaxis_title=measure
         ),
-        title=f"{measure} across Events for selected subjects in 3D"
+        title=f"{measure} across Subjects for selected events in 3D"
     )
     st.plotly_chart(fig)
+
 
 def plot_line(data, subjects, events, measure, lower_bound, upper_bound):
     data_subset = data[data['Subjects'].isin(subjects) & data['Events'].isin(events)]
