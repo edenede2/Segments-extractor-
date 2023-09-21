@@ -166,21 +166,21 @@ def main():
             else:
                 st.warning("Unable to revert the log transformation. Please reload or re-upload the original data.")
 
-    all_full_subjects = data[data['Subjects'].str.startswith('Full_')]['Subjects'].unique().tolist()
-    all_segmented_subjects = data[~data['Subjects'].str.startswith('Full_')]['Subjects'].unique().tolist()
-    selected_segmented_subjects = st.multiselect('Select Segmented Subjects', all_segmented_subjects, default=all_segmented_subjects)
+        all_full_subjects = data[data['Subjects'].str.startswith('Full_')]['Subjects'].unique().tolist()
+        all_segmented_subjects = data[~data['Subjects'].str.startswith('Full_')]['Subjects'].unique().tolist()
+        selected_segmented_subjects = st.multiselect('Select Segmented Subjects', all_segmented_subjects, default=all_segmented_subjects)
 
     
-    all_events = data['Events'].unique().tolist()
-    selected_events = st.multiselect('Select Events', all_events, default=all_events)
+        all_events = data['Events'].unique().tolist()
+        selected_events = st.multiselect('Select Events', all_events, default=all_events)
     
-    # If specific events are selected, display segments relevant to those events
-     # Filter segments based on selected subjects and events
-    filtered_data = data[(data['Subjects'].isin(selected_segmented_subjects)) & (data['Events'].isin(selected_events))]
-    relevant_segments = filtered_data['Segments'].unique().tolist()
-    selected_segments = relevant_segments
-    selected_segments = st.multiselect('Select Segments', relevant_segments, default=[s for s in selected_segments if s in relevant_segments])
-    filtered_data = filtered_data[filtered_data['Segments'].isin(selected_segments)]
+        # If specific events are selected, display segments relevant to those events
+         # Filter segments based on selected subjects and events
+        filtered_data = data[(data['Subjects'].isin(selected_segmented_subjects)) & (data['Events'].isin(selected_events))]
+        relevant_segments = filtered_data['Segments'].unique().tolist()
+        selected_segments = relevant_segments
+        selected_segments = st.multiselect('Select Segments', relevant_segments, default=[s for s in selected_segments if s in relevant_segments])
+        filtered_data = filtered_data[filtered_data['Segments'].isin(selected_segments)]
 
     measurements = ['RMSSD', 'SDNN','MHR']
     selected_measurements = st.selectbox('Select Measurements', measurements, index=0)
@@ -222,9 +222,10 @@ def main():
                 st.write("Full data log transformation has been reverted.")
             else:
                 st.warning("Unable to revert the full data log transformation.")
-    original_full_data = full_data.copy()
-    full_data = data[data['Subjects'].str.startswith('Full_')]
-
+    
+        full_data = data[data['Subjects'].str.startswith('Full_')]
+        original_full_data = full_data.copy()
+    
     full_measurements = ['RMSSD', 'SDNN', 'MHR']
     selected_full_subjects = st.multiselect('Select Full Subjects', all_full_subjects, default=all_full_subjects)
     selected_full_measurement = st.selectbox('Select Measurement for Full Data', full_measurements)
