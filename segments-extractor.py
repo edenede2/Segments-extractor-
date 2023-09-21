@@ -132,17 +132,20 @@ def plot_full_data_swarm(data, measure):
 
 def main():
     st.title("Visualization App for Total_segments_Val.csv")
-    
+    original_data = None
     file_option = st.radio("Choose a CSV file source:", ["Use default file", "Upload my own file"])
     
     if file_option == "Use default file":
         data = pd.read_csv('Total_segments_Val.csv')
+        original_data = data.copy()
         full_data = data[data['Subjects'].str.startswith("Full_")]
         st.write("Preview of the Default Data")
+        original_data = data.copy()
     elif file_option == "Upload my own file":
         uploaded_file = st.file_uploader("Upload a CSV file", type="csv")
         if uploaded_file:
             data = pd.read_csv(uploaded_file)
+            original_data = data.copy()
             st.write("Preview of the Uploaded Data")
         else:
             st.warning("Please upload a CSV file.")
@@ -156,6 +159,12 @@ def main():
         measurements_to_transform = ['RMSSD', 'SDNN','MHR']
         data = transform_to_log(data, measurements_to_transform)
         st.write("Segment data has been transformed to log scale.")
+        if st.button("Cancel Log Transformation"):
+            if original_data is not None:
+                data = original_data.copy()
+                st.write("Log transformation has been reverted.")
+            else:
+                st.warning("Unable to revert the log transformation. Please reload or re-upload the original data.")
 
     all_full_subjects = data[data['Subjects'].str.startswith('Full_')]['Subjects'].unique().tolist()
     all_segmented_subjects = data[~data['Subjects'].str.startswith('Full_')]['Subjects'].unique().tolist()
@@ -207,7 +216,13 @@ def main():
         measurements_to_transform_full = ['RMSSD', 'SDNN', 'MHR']
         full_data = transform_to_log(full_data, measurements_to_transform_full)
         st.write("Full data has been transformed to log scale.")
-    
+        if st.button("Cancel Full Data Log Transformation"):
+            if original_full_data is not None:
+                full_data = original_full_data.copy()
+                st.write("Full data log transformation has been reverted.")
+            else:
+                st.warning("Unable to revert the full data log transformation.")
+    original_full_data = full_data.copy()
     full_data = data[data['Subjects'].str.startswith('Full_')]
 
     full_measurements = ['RMSSD', 'SDNN', 'MHR']
