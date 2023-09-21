@@ -4,9 +4,17 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 import plotly.express as px
 import plotly.graph_objects as go
-
+import numpy as np
 import warnings
 warnings.filterwarnings("ignore", category=FutureWarning)
+
+
+def transform_to_log(data, measurements):
+
+    transformed_data = data.copy()
+    for measure in measurements:
+        transformed_data[measure] = np.log1p(transformed_data[measure])  # Use log1p to handle values <= 0
+    return transformed_data
 
 
 def plot_line_3d(data, subjects, events, measure, lower_bound, upper_bound):
@@ -141,6 +149,13 @@ def main():
             return  # This ensures the rest of the code doesn't run until a file is uploaded
 
     st.write(data.head())
+    
+    st.markdown("## Transform Segment Data")
+    log_transform = st.button("Transform Segment Data to Log Scale")
+    if log_transform:
+        measurements_to_transform = ['RMSSD', 'SDNN','MHR']
+        data = transform_to_log(data, measurements_to_transform)
+        st.write("Segment data has been transformed to log scale.")
 
     all_full_subjects = data[data['Subjects'].str.startswith('Full_')]['Subjects'].unique().tolist()
     all_segmented_subjects = data[~data['Subjects'].str.startswith('Full_')]['Subjects'].unique().tolist()
@@ -185,8 +200,14 @@ def main():
             plot_facet(filtered_data, selected_segmented_subjects, selected_events, selected_measurements)
    
 
-    st.markdown("## Visualization for Full Data")
- 
+    st.markdown("## Visualization for non-segmented Data")
+    st.markdown("## Transform non-segmented Data")
+    log_transform_full = st.button("Transform non-segmented Data to Log Scale")
+    if log_transform_full:
+        measurements_to_transform_full = ['RMSSD', 'SDNN', 'MHR']
+        full_data = transform_to_log(full_data, measurements_to_transform_full)
+        st.write("Full data has been transformed to log scale.")
+    
     full_data = data[data['Subjects'].str.startswith('Full_')]
 
     full_measurements = ['RMSSD', 'SDNN', 'MHR']
