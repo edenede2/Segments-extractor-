@@ -15,48 +15,7 @@ def transform_to_log(data, measurements):
     for measure in measurements:
         transformed_data[measure] = np.log1p(transformed_data[measure])  # Use log1p to handle values <= 0
     return transformed_data
-    
-def categorize_mast_measures(data, measurement):
-    unique_subjects = data['Subjects'].unique()
-    mast_categories = {}
-    for subject in unique_subjects:
-        subject_data = data[data['Subjects'] == subject]
-        baseline = subject_data[subject_data['Events'] == 'rest baseline'][measurement].mean()
-        mast = subject_data[subject_data['Events'] == 'MAST'][measurement].mean()
-        if mast > baseline:
-            category = 'Higher'
-        elif mast < baseline:
-            category = 'Lower'
-        else:
-            category = 'Unchanged'
-        mast_categories[subject] = category
-    data['MAST_Category'] = data['Subjects'].map(mast_categories)
-    return data
 
-
-def calculate_scenario_changes(data, measurement):
-    """
-    Calculate the percentage change in measurements between scenarios 1 and 2, and between scenarios 1 and 3.
-    """
-    scenario_changes = {}
-    for subject in data['Subjects'].unique():
-        subject_data = data[data['Subjects'] == subject]
-        scenario_1 = subject_data[subject_data['Events'] == 'Scenario 1'][measurement].mean()
-        scenario_2 = subject_data[subject_data['Events'] == 'Scenario 2'][measurement].mean()
-        scenario_3 = subject_data[subject_data['Events'] == 'Scenario 3'][measurement].mean()
-        change_1_2 = ((scenario_2 - scenario_1) / scenario_1) * 100
-        change_1_3 = ((scenario_3 - scenario_1) / scenario_1) * 100
-        scenario_changes[subject] = {'Change_1_2': change_1_2, 'Change_1_3': change_1_3}
-    change_df = pd.DataFrame.from_dict(scenario_changes, orient='index')
-    return change_df
-
-def divide_hrv_measurements(data, measurement):
-    """
-    Divide the subjects into two groups: those with high HRV measurements and those with low HRV measurements.
-    """
-    median_hrv = data[measurement].median()
-    data['HRV_Group'] = data[measurement].apply(lambda x: 'High' if x >= median_hrv else 'Low')
-    return data
 
 def plot_line_3d(data, subjects, events, measure, lower_bound, upper_bound):
     data_subset = data[data['Subjects'].isin(subjects) & data['Events'].isin(events)]
@@ -206,29 +165,8 @@ def main():
                 st.write("Log transformation has been reverted.")
             else:
                 st.warning("Unable to revert the log transformation. Please reload or re-upload the original data.")
-
-    # Insert the modified code here
-    measurements = ['RMSSD', 'SDNN','MHR']
-    selected_measurement = st.selectbox('Select Measurement for Categorization, Scenario Changes, and HRV Grouping', measurements)
-    data = categorize_mast_measures(data, selected_measurement)
-    change_df = calculate_scenario_changes(data, selected_measurement)
-    data = divide_hrv_measurements(data, selected_measurement)
-    data = categorize_mast_measures(data)
-    change_df = calculate_scenario_changes(data)
-    data = divide_hrv_measurements(data)
-
-    # Add options in the sidebar to visualize the new functionalities
-    if st.sidebar.checkbox('Show Categorized MAST Measures'):
-        st.subheader('Categorized MAST Measures')
-        st.write(data[['Subjects', 'MAST', 'MAST_Category']])
-
-    if st.sidebar.checkbox('Show Scenario Changes'):
-        st.subheader('Scenario Changes')
-        st.write(change_df)
-
-    if st.sidebar.checkbox('Show HRV Groups'):
-        st.subheader('HRV Groups')
-        st.write(data[['Subjects', 'RMSSD', 'HRV_Group']])    
+    
+    
     all_full_subjects = data[data['Subjects'].str.startswith('Full_')]['Subjects'].unique().tolist()
     all_segmented_subjects = data[~data['Subjects'].str.startswith('Full_')]['Subjects'].unique().tolist()
     selected_segmented_subjects = st.multiselect('Select Segmented Subjects', all_segmented_subjects, default=all_segmented_subjects)
@@ -316,4 +254,3 @@ def main():
             
 if __name__ == "__main__":
     main()
-
