@@ -16,6 +16,113 @@ def transform_to_log(data, measurements):
         transformed_data[measure] = np.log1p(transformed_data[measure])  # Use log1p to handle values <= 0
     return transformed_data
 
+def categorize_stress_levels(data):
+    # Define a new column 'Stress Category' to store the categorization
+    data['Stress Category'] = 'No Change'
+    # Assuming 'MAST' and 'Baseline' are part of the 'Events' column
+    mast_data = data[data['Events'] == 'MAST']
+    baseline_data = data[data['Events'] == 'rest baseline']
+    
+    for subject in data['Subjects'].unique():
+        if mast_data[mast_data['Subjects'] == subject]['RMSSD'].mean() > baseline_data[baseline_data['Subjects'] == subject]['RMSSD'].mean():
+            data.loc[data['Subjects'] == subject, 'Stress Category'] = 'Higher Stress'
+        elif mast_data[mast_data['Subjects'] == subject]['RMSSD'].mean() < baseline_data[baseline_data['Subjects'] == subject]['RMSSD'].mean():
+            data.loc[data['Subjects'] == subject, 'Stress Category'] = 'Lower Stress'
+    
+    return data
+    
+def calculate_percentage_change(data):
+    # Calculate the percentage change for applicable scenarios
+    # Update this section based on the actual scenario columns and calculations
+    scenario_1_data = data[data['Events'] == 'scenario 1']
+    scenario_2_data = data[data['Events'] == 'scenario 2']
+    scenario_3_data = data[data['Events'] == 'scenario 3']
+    
+    for subject in data['Subjects'].unique():
+        scenario_1_mean = scenario_1_data[scenario_1_data['Subjects'] == subject]['RMSSD'].mean()
+        data.loc[data['Subjects'] == subject, 'Scenario 1 to 2 Change'] = ((scenario_2_data[scenario_2_data['Subjects'] == subject]['RMSSD'].mean() - scenario_1_mean) / scenario_1_mean) * 100
+        data.loc[data['Subjects'] == subject, 'Scenario 1 to 3 Change'] = ((scenario_3_data[scenario_3_data['Subjects'] == subject]['RMSSD'].mean() - scenario_1_mean) / scenario_1_mean) * 100
+    
+    return data
+
+def categorize_hrv_levels(data):
+    # Define a threshold for high and low HRV
+    hrv_threshold = data['RMSSD'].median()
+    
+    # Categorize subjects based on RMSSD measurements
+    data['HRV Category'] = 'Low HRV'
+    data.loc[data['RMSSD'] > hrv_threshold, 'HRV Category'] = 'High HRV'
+    
+    return data
+
+def categorize_mast_measures(data):
+    categorized_data = data.copy()
+    for subject in categorized_data['Subjects'].unique():
+        subject_data = categorized_data[categorized_data['Subjects'] == subject]
+        baseline_value = subject_data[subject_data['Events'] == 'Baseline']['Measurement'].mean()  # Replace 'Measurement' with the actual column name for stress
+        mast_value = subject_data[subject_data['Events'] == 'MAST']['Measurement'].mean()
+        
+        if mast_value > baseline_value:
+            category = 'Higher'
+        elif mast_value < baseline_value:
+            category = 'Lower'
+        else:
+            category = 'Unchanged'
+        
+        categorized_data.loc[categorized_data['Subjects'] == subject, 'MAST_Category'] = category
+    
+    return categorized_data
+
+def visualize_mast_categories(categorized_data, measurement):
+    # Bar Plot
+    fig_bar = px.histogram(categorized_data, x='MAST_Category', title='Distribution of MAST Categories')
+    st.plotly_chart(fig_bar)
+    
+    # Box Plot
+    fig_box = px.box(categorized_data, x='MAST_Category', y=measurement, title='Box Plot of Measurements by MAST Category')
+    st.plotly_chart(fig_box)
+
+
+def compare_scenario_measurements(data):
+    comparison_data = pd.DataFrame()
+    for subject in data['Subjects'].unique():
+        subject_data = data[data['Subjects'] == subject]
+        scenario_1_value = subject_data[subject_data['Events'] == 'Scenario 1']['Measurement'].mean()
+        scenario_2_value = subject_data[subject_data['Events'] == 'Scenario 2']['Measurement'].mean()
+        scenario_3_value = subject_data[subject_data['Events'] == 'Scenario 3']['Measurement'].mean()
+        
+        scenario_2_change = ((scenario_2_value - scenario_1_value) / scenario_1_value) * 100
+        scenario_3_change = ((scenario_3_value - scenario_1_value) / scenario_1_value) * 100
+        
+        comparison_data = comparison_data.append({
+            'Subject': subject,
+            'Scenario 2 Change (%)': scenario_2_change,
+            'Scenario 3 Change (%)': scenario_3_change,
+        }, ignore_index=True)
+    
+    return comparison_data
+    
+def visualize_scenario_comparisons(comparison_data):
+    # Bar Plot
+    fig_bar = px.bar(comparison_data, x='Subject', y=['Scenario 2 Change (%)', 'Scenario 3 Change (%)'], title='Percentage Change in Measurements')
+    st.plotly_chart(fig_bar)
+    
+    # Line Plot
+    fig_line = px.line(comparison_data.melt(id_vars='Subject', value_vars=['Scenario 2 Change (%)', 'Scenario 3 Change (%)']), x='Subject', y='value', color='variable', title='Line Plot of Percentage Change in Measurements')
+    st.plotly_chart(fig_line)
+
+def divide_hrv_measurements(data, threshold):
+    data['HRV_Group'] = np.where(data['HRV_Measurement'] > threshold, 'High', 'Low')  # Replace 'HRV_Measurement' with the actual column name for HRV
+    return data
+
+def visualize_divided_hrv(divided_data, hrv_measurement):
+    # Histogram
+    fig_histogram = px.histogram(divided_data, x='HRV_Group', title='Distribution of HRV Groups')
+    st.plotly_chart(fig_histogram)
+    
+    # Violin Plot
+    fig_violin = px.violin(divided_data, x='HRV_Group', y=hrv_measurement, box=True, points="all", title='Violin Plot of HRV Measurements by Group')
+    st.plotly_chart(fig_violin)
 
 def plot_line_3d(data, subjects, events, measure, lower_bound, upper_bound):
     data_subset = data[data['Subjects'].isin(subjects) & data['Events'].isin(events)]
@@ -134,7 +241,23 @@ def main():
     st.title("Visualization App for Total_segments_Val.csv")
     original_data = None
     file_option = st.radio("Choose a CSV file source:", ["Use default file", "Upload my own file"])
+    st.sidebar.markdown("## Advanced Analysis Options")
     
+    # Categorize MAST Measures
+    if st.sidebar.checkbox("Categorize MAST Measures"):
+        categorized_data = categorize_mast_measures(data)
+        visualize_mast_categories(categorized_data)
+    
+    # Compare Scenario Measurements
+    if st.sidebar.checkbox("Compare Scenario Measurements"):
+        comparison_data = compare_scenario_measurements(data)
+        visualize_scenario_comparisons(comparison_data)
+    
+    # Divide HRV Measurements
+    if st.sidebar.checkbox("Divide HRV Measurements"):
+        divided_data = divide_hrv_measurements(data)
+        visualize_divided_hrv(divided_data)
+        
     if file_option == "Use default file":
         data = pd.read_csv('Total_segments_Val.csv')
         original_data = data.copy()
