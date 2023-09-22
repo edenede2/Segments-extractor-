@@ -239,42 +239,60 @@ def plot_full_data_swarm(data, measure):
 
 def main():
     st.title("Visualization App for Total_segments_Val.csv")
-    original_data = None
+    
+    # Initialize data as None
+    data = None
+    
     file_option = st.radio("Choose a CSV file source:", ["Use default file", "Upload my own file"])
     st.sidebar.markdown("## Advanced Analysis Options")
     
-    # Categorize MAST Measures
-    if st.sidebar.checkbox("Categorize MAST Measures"):
-        categorized_data = categorize_mast_measures(data)
-        visualize_mast_categories(categorized_data)
-    
-    # Compare Scenario Measurements
-    if st.sidebar.checkbox("Compare Scenario Measurements"):
-        comparison_data = compare_scenario_measurements(data)
-        visualize_scenario_comparisons(comparison_data)
-    
-    # Divide HRV Measurements
-    if st.sidebar.checkbox("Divide HRV Measurements"):
-        divided_data = divide_hrv_measurements(data)
-        visualize_divided_hrv(divided_data)
-        
     if file_option == "Use default file":
         data = pd.read_csv('Total_segments_Val.csv')
-        original_data = data.copy()
-        full_data = data[data['Subjects'].str.startswith("Full_")]
         st.write("Preview of the Default Data")
-        original_data = data.copy()
     elif file_option == "Upload my own file":
         uploaded_file = st.file_uploader("Upload a CSV file", type="csv")
         if uploaded_file:
             data = pd.read_csv(uploaded_file)
-            original_data = data.copy()
             st.write("Preview of the Uploaded Data")
         else:
             st.warning("Please upload a CSV file.")
             return  # This ensures the rest of the code doesn't run until a file is uploaded
+    
+    # Check if data is not None before proceeding
+    if data is not None:
+        original_data = data.copy()
+        # Categorize MAST Measures
+        if st.sidebar.checkbox("Categorize MAST Measures"):
+            categorized_data = categorize_mast_measures(data)
+            visualize_mast_categories(categorized_data)
+    
+        # Compare Scenario Measurements
+        if st.sidebar.checkbox("Compare Scenario Measurements"):
+            comparison_data = compare_scenario_measurements(data)
+            visualize_scenario_comparisons(comparison_data)
+    
+        # Divide HRV Measurements
+        if st.sidebar.checkbox("Divide HRV Measurements"):
+            divided_data = divide_hrv_measurements(data)
+            visualize_divided_hrv(divided_data)
+        
+        if file_option == "Use default file":
+            data = pd.read_csv('Total_segments_Val.csv')
+            original_data = data.copy()
+            full_data = data[data['Subjects'].str.startswith("Full_")]
+            st.write("Preview of the Default Data")
+            original_data = data.copy()
+        elif file_option == "Upload my own file":
+            uploaded_file = st.file_uploader("Upload a CSV file", type="csv")
+            if uploaded_file:
+                data = pd.read_csv(uploaded_file)
+                original_data = data.copy()
+                st.write("Preview of the Uploaded Data")
+            else:
+                st.warning("Please upload a CSV file.")
+                return  # This ensures the rest of the code doesn't run until a file is uploaded
 
-    st.write(data.head())
+        st.write(data.head())
     
     st.markdown("## Transform Segment Data")
     log_transform = st.button("Transform Segment Data to Log Scale")
