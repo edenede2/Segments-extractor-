@@ -59,8 +59,9 @@ def categorize_mast_measures(data):
     categorized_data = data.copy()
     for subject in categorized_data['Subjects'].unique():
         subject_data = categorized_data[categorized_data['Subjects'] == subject]
-        baseline_value = subject_data[subject_data['Events'] == 'Baseline']['Measurement'].mean()  # Replace 'Measurement' with the actual column name for stress
-        mast_value = subject_data[subject_data['Events'] == 'MAST']['Measurement'].mean()
+        baseline_value = subject_data[subject_data['Events'] == 'rest baseline']['RMSSD'].mean()
+        mast_value = subject_data[subject_data['Events'] == 'MAST']['RMSSD'].mean()
+
         
         if mast_value > baseline_value:
             category = 'Higher'
