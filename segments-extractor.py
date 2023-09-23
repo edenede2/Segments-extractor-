@@ -172,22 +172,22 @@ def resilience_sustainability_page():
     def plot_with_threshold(change_data, scenario, measurement, threshold):
         # Define colors based on threshold
         colors = ['#d62728' if abs(val) > threshold else '#1f77b4' for val in change_data[measurement]]
-        
+    
         fig = sp.make_subplots(rows=1, cols=2, subplot_titles=("Scatter Plot", "Bar Plot"))
-        
+    
         # Scatter plot
         scatter_trace = go.Scatter(x=change_data['Subjects'], y=change_data[measurement], mode='markers', marker=dict(color=colors))
         fig.add_trace(scatter_trace, row=1, col=1)
-        
+    
         # Bar plot
         bar_trace = go.Bar(x=change_data['Subjects'], y=change_data[measurement], marker=dict(color=colors))
         fig.add_trace(bar_trace, row=1, col=2)
-        
-        # Add reference line
+    
+        # Add shaded region to highlight the area beyond the threshold
         for col in range(1, 3):
-            fig.add_shape(go.layout.Shape(type='line', y0=threshold, y1=threshold, xref='paper', x0=0, x1=1, line=dict(color='gray', dash='dash')), row=1, col=col)
-            fig.add_shape(go.layout.Shape(type='line', y0=-threshold, y1=-threshold, xref='paper', x0=0, x1=1, line=dict(color='gray', dash='dash')), row=1, col=col)
-        
+            fig.add_shape(go.layout.Shape(type='rect', y0=threshold, y1=max(change_data[measurement]) + 1, xref='paper', x0=0, x1=1, fillcolor='rgba(255,0,0,0.2)', line=dict(width=0), layer='below'), row=1, col=col)
+            fig.add_shape(go.layout.Shape(type='rect', y0=min(change_data[measurement]) - 1, y1=-threshold, xref='paper', x0=0, x1=1, fillcolor='rgba(255,0,0,0.2)', line=dict(width=0), layer='below'), row=1, col=col)
+    
         fig.update_layout(title_text=f'Percentage Change in {measurement}: {scenario}')
         st.plotly_chart(fig)
     
