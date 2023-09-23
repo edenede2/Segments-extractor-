@@ -170,9 +170,7 @@ def resilience_sustainability_page():
     # Categorize full subjects based on the calculated percentage change
     change_sc2_sc1, change_sc3_sc1 = categorize_subjects(change_sc2_sc1, change_sc3_sc1, threshold)
     
-    
-
-   def plot_with_threshold(change_data, scenario, measurement, threshold):
+    def plot_with_threshold(change_data, scenario, measurement, threshold):
         # Define colors based on threshold
         colors = ['#d62728' if abs(val) > threshold else '#1f77b4' for val in change_data[measurement]]
     
