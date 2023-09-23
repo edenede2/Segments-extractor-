@@ -173,32 +173,27 @@ def resilience_sustainability_page():
     def plot_with_threshold(change_data, scenario, measurement, threshold):
         # Define colors based on threshold
         colors = ['#d62728' if abs(val) > threshold else '#1f77b4' for val in change_data[measurement]]
-    
+        
         # Calculate the percentage of subjects under the threshold
         under_threshold_percentage = len(change_data[abs(change_data[measurement]) <= threshold]) / len(change_data) * 100
-    
+        
         fig = sp.make_subplots(rows=1, cols=2, subplot_titles=("Scatter Plot", "Bar Plot"))
-    
+        
         # Scatter plot
         scatter_trace = go.Scatter(x=change_data['Subjects'], y=change_data[measurement], mode='markers', marker=dict(color=colors))
         fig.add_trace(scatter_trace, row=1, col=1)
-    
+        
         # Bar plot
         bar_trace = go.Bar(x=change_data['Subjects'], y=change_data[measurement], marker=dict(color=colors))
         fig.add_trace(bar_trace, row=1, col=2)
-    
-        # Add reference line
-        for col in range(1, 3):
-            fig.add_shape(go.layout.Shape(type='line', y0=threshold, y1=threshold, xref='paper', x0=0, x1=1, line=dict(color='gray', dash='dash')), row=1, col=col)
-            fig.add_shape(go.layout.Shape(type='line', y0=-threshold, y1=-threshold, xref='paper', x0=0, x1=1, line=dict(color='gray', dash='dash')), row=1, col=col)
-    
+        
         # Add annotation with percentage under the threshold
         fig.add_annotation(
             text=f"{under_threshold_percentage:.2f}% under threshold",
-            xanchor='right',
-            x=1,
+            xanchor='left',
+            x=0,
             yanchor='top',
-            y=1,
+            y=1.05,
             showarrow=False,
             font=dict(size=12, color='black'),
             bgcolor='rgba(255, 255, 255, 0.8)',
@@ -206,7 +201,39 @@ def resilience_sustainability_page():
             borderwidth=1,
             borderpad=4
         )
-    
+        
+        # Re-add reference line after adding annotation to ensure it's visible
+        for col in range(1, 3):
+            fig.add_shape(
+                go.layout.Shape(
+                    type='rect',
+                    y0=threshold,
+                    y1=fig.layout.yaxis.range[1],
+                    xref='paper',
+                    x0=0,
+                    x1=1,
+                    fillcolor='rgba(255, 0, 0, 0.2)',
+                    layer='below',
+                    line_width=0
+                ),
+                row=1,
+                col=col
+            )
+            fig.add_shape(
+                go.layout.Shape(
+                    type='rect',
+                    y0=fig.layout.yaxis.range[0],
+                    y1=-threshold,
+                    xref='paper',
+                    x0=0,
+                    x1=1,
+                    fillcolor='rgba(255, 0, 0, 0.2)',
+                    layer='below',
+                    line_width=0
+                ),
+                row=1,
+                col=col
+            )
         fig.update_layout(title_text=f'Percentage Change in {measurement}: {scenario}')
         st.plotly_chart(fig)
 
