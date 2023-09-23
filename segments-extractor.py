@@ -202,13 +202,21 @@ def resilience_sustainability_page():
             borderpad=4
         )
         
+        # Check if yaxis range is not None, otherwise set default values
+        if fig.layout.yaxis.range is not None:
+            y1 = fig.layout.yaxis.range[1]
+            y0 = fig.layout.yaxis.range[0]
+        else:
+            y1 = max(change_data[measurement])
+            y0 = min(change_data[measurement])
+        
         # Re-add reference line after adding annotation to ensure it's visible
         for col in range(1, 3):
             fig.add_shape(
                 go.layout.Shape(
                     type='rect',
                     y0=threshold,
-                    y1=fig.layout.yaxis.range[1],
+                    y1=y1,
                     xref='paper',
                     x0=0,
                     x1=1,
@@ -222,7 +230,7 @@ def resilience_sustainability_page():
             fig.add_shape(
                 go.layout.Shape(
                     type='rect',
-                    y0=fig.layout.yaxis.range[0],
+                    y0=y0,
                     y1=-threshold,
                     xref='paper',
                     x0=0,
