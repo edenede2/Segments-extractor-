@@ -181,7 +181,7 @@ def main():
                 st.warning("Unable to revert the log transformation. Please reload or re-upload the original data.")
     
     # Checkbox to show/hide categorized subjects
-    show_categorized_subjects = st.checkbox("Show Categorized Subjects", value=True)
+    show_categorized_subjects = st.checkbox("Show Categorized Subjects (affected\unaffected)", value=True)
     
     # Calculate and show categorized subjects only if the checkbox is checked
     if show_categorized_subjects:
