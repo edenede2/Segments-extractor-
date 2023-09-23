@@ -180,7 +180,7 @@ def resilience_sustainability_page():
     # Categorize full subjects based on the calculated percentage change
     change_sc2_sc1, change_sc3_sc1 = categorize_subjects(change_sc2_sc1, change_sc3_sc1, threshold)
     
-    def plot_with_threshold(change_data, scenario, measurement, threshold):
+    def plot_with_threshold(change_data, scenario, measurement, threshold, full_data):
         # Check for duplicate subjects in change_data
         duplicate_subjects = change_data[change_data.duplicated('Subjects', keep=False)]
         if not duplicate_subjects.empty:
@@ -270,20 +270,14 @@ def resilience_sustainability_page():
         fig.update_layout(title_text=f'Percentage Change in {measurement}: {scenario}')
         st.plotly_chart(fig)
 
-     # Scenario 2 vs Scenario 1
+        # Scenario 2 vs Scenario 1
     st.markdown(f"### Percentage Change in {measurement}: Scenario 2 vs Scenario 1")
-    plot_with_threshold(change_sc2_sc1, "Scenario 2 vs Scenario 1", measurement, threshold)
-    
+    plot_with_threshold(change_sc2_sc1, "Scenario 2 vs Scenario 1", measurement, threshold, full_data)
+        
     # Scenario 3 vs Scenario 1
     st.markdown(f"### Percentage Change in {measurement}: Scenario 3 vs Scenario 1")
-    plot_with_threshold(change_sc3_sc1, "Scenario 3 vs Scenario 1", measurement, threshold)
-     # Scenario 2 vs Scenario 1
-    st.markdown(f"### Percentage Change in {measurement}: Scenario 2 vs Scenario 1")
-    plot_with_threshold(change_sc2_sc1, "Scenario 2 vs Scenario 1", measurement, threshold)
-    
-    # Scenario 3 vs Scenario 1
-    st.markdown(f"### Percentage Change in {measurement}: Scenario 3 vs Scenario 1")
-    plot_with_threshold(change_sc3_sc1, "Scenario 3 vs Scenario 1", measurement, threshold)
+    plot_with_threshold(change_sc3_sc1, "Scenario 3 vs Scenario 1", measurement, threshold, full_data)
+
     
     # Define bins for HRV and resilience values
     hrv_bins = pd.cut(mean_hrv, bins=[0, hrv_threshold, mean_hrv.max()], labels=['Low', 'High'])
