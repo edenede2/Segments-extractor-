@@ -155,33 +155,42 @@ def resilience_sustainability_page():
     
     data = load_data()
     
+    # Filter only full (non-segmented) subjects
+    full_data = data[data['Subjects'].str.startswith('Full_')]
+    
     threshold = st.slider("Set Threshold for Categorization as Resilient (%)", min_value=0, max_value=100, value=10)
+    
+    # Allow user to select the measurement they want to visualize
+    measurement = st.selectbox("Select Measurement:", ['RMSSD', 'SDNN', 'MHR'])
 
-    change_sc2_sc1, change_sc3_sc1 = calculate_percentage_change(data)
+    # Calculate percentage change for full subjects only
+    change_sc2_sc1, change_sc3_sc1 = calculate_percentage_change(full_data)
+    
+    # Categorize full subjects based on the calculated percentage change
     change_sc2_sc1, change_sc3_sc1 = categorize_subjects(change_sc2_sc1, change_sc3_sc1, threshold)
 
-    # Visualize the calculated percentage change and categories
-    # You can use plotly or seaborn for visualization based on your preference
-
-
+    # Visualize the calculated percentage change and categories for the selected measurement
+    
     # Visualization of Percentage Change for Scenario 2 vs Scenario 1
-    st.markdown("### Percentage Change: Scenario 2 vs Scenario 1")
-    fig1 = px.bar(change_sc2_sc1, x='Subjects', y=['RMSSD', 'SDNN', 'MHR'], title='Percentage Change in Measurements: Scenario 2 vs Scenario 1')
+    st.markdown(f"### Percentage Change in {measurement}: Scenario 2 vs Scenario 1")
+    
+    # Scatter Plot
+    fig1 = px.scatter(change_sc2_sc1, x='Subjects', y=measurement, title=f'Percentage Change in {measurement}: Scenario 2 vs Scenario 1')
     st.plotly_chart(fig1)
-
-    # Visualization of Categories for Scenario 2 vs Scenario 1
-    st.markdown("### Categories: Scenario 2 vs Scenario 1")
-    fig2 = px.histogram(change_sc2_sc1, x='Category', title='Number of Subjects in Each Category: Scenario 2 vs Scenario 1')
+    
+    # Bar Plot
+    fig2 = px.bar(change_sc2_sc1, x='Subjects', y=measurement, title=f'Percentage Change in {measurement}: Scenario 2 vs Scenario 1')
     st.plotly_chart(fig2)
-
+    
     # Visualization of Percentage Change for Scenario 3 vs Scenario 1
-    st.markdown("### Percentage Change: Scenario 3 vs Scenario 1")
-    fig3 = px.bar(change_sc3_sc1, x='Subjects', y=['RMSSD', 'SDNN', 'MHR'], title='Percentage Change in Measurements: Scenario 3 vs Scenario 1')
+    st.markdown(f"### Percentage Change in {measurement}: Scenario 3 vs Scenario 1")
+    
+    # Scatter Plot
+    fig3 = px.scatter(change_sc3_sc1, x='Subjects', y=measurement, title=f'Percentage Change in {measurement}: Scenario 3 vs Scenario 1')
     st.plotly_chart(fig3)
-
-    # Visualization of Categories for Scenario 3 vs Scenario 1
-    st.markdown("### Categories: Scenario 3 vs Scenario 1")
-    fig4 = px.histogram(change_sc3_sc1, x='Category', title='Number of Subjects in Each Category: Scenario 3 vs Scenario 1')
+    
+    # Bar Plot
+    fig4 = px.bar(change_sc3_sc1, x='Subjects', y=measurement, title=f'Percentage Change in {measurement}: Scenario 3 vs Scenario 1')
     st.plotly_chart(fig4)
     
 def load_data():
