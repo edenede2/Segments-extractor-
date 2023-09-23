@@ -181,14 +181,22 @@ def resilience_sustainability_page():
     change_sc2_sc1, change_sc3_sc1 = categorize_subjects(change_sc2_sc1, change_sc3_sc1, threshold)
     
     def plot_with_threshold(change_data, scenario, measurement, threshold):
-    # Check for duplicate subjects
+        # Check for duplicate subjects in change_data
         duplicate_subjects = change_data[change_data.duplicated('Subjects', keep=False)]
         if not duplicate_subjects.empty:
-            st.warning("Found duplicate subjects. Please check the data.")
+            st.warning("Found duplicate subjects in change_data. Please check the data.")
             st.write(duplicate_subjects)
-              # Drop duplicate rows based on the 'Subjects' column
-        change_data = change_data.drop_duplicates(subset='Subjects', keep=False)
-    
+            # Drop duplicate rows based on the 'Subjects' column
+            change_data = change_data.drop_duplicates(subset='Subjects', keep=False)
+        
+        # Check for duplicate subjects in full_data
+        duplicate_subjects_full = full_data[full_data.duplicated('Subjects', keep=False)]
+        if not duplicate_subjects_full.empty:
+            st.warning("Found duplicate subjects in full_data. Please check the data.")
+            st.write(duplicate_subjects_full)
+            # Drop duplicate rows based on the 'Subjects' column
+            full_data = full_data.drop_duplicates(subset='Subjects', keep=False)
+
         colors = full_data.set_index('Subjects')['HRV_Category'].map({'High': 'red', 'Low': 'blue'}).reindex(change_data['Subjects']).reset_index(drop=True)
         
         # Calculate the percentage of subjects under the threshold
