@@ -7,6 +7,7 @@ import plotly.graph_objects as go
 import numpy as np
 import warnings
 warnings.filterwarnings("ignore", category=FutureWarning)
+import scipy.stats as stats
 
 
 def transform_to_log(data, measurements):
@@ -44,17 +45,17 @@ def plot_line_3d(data, subjects, events, measure, lower_bound, upper_bound):
     st.plotly_chart(fig)
 
 
-def plot_line(data, subjects, events, measure, lower_bound, upper_bound):
+def plot_line(data, subjects, events, measure, lower_bound, upper_bound, subject_categories):
     data_subset = data[data['Subjects'].isin(subjects) & data['Events'].isin(events)]
     
     if lower_bound and upper_bound:
         data_subset = data_subset[(data_subset[measure] >= lower_bound) & (data_subset[measure] <= upper_bound)]
     
     fig = px.line(data_subset, x='Segments', y=measure, color='Events', line_dash='Subjects', 
+                  line_group=data_subset['Subjects'].map(subject_categories),  # Color based on category
                   title=f"{measure} across Events for selected subjects", 
                   labels={'Segments': 'Segments', measure: measure}, 
                   hover_data=['Subjects', 'Events'])
-
     st.plotly_chart(fig)
 
 def plot_box(data, subjects, events, measure, x_var='Subjects', lower_bound=None, upper_bound=None):
@@ -72,38 +73,35 @@ def plot_box(data, subjects, events, measure, x_var='Subjects', lower_bound=None
     fig.update_layout(title=f"Box plot of {measure} across {x_var}", xaxis_title=x_var, yaxis_title=measure)
     st.plotly_chart(fig)
     
-def plot_violin(data, subjects, events, measure, x_var='Subjects', lower_bound=None, upper_bound=None):
+def plot_violin(data, subjects, events, measure, x_var='Subjects', lower_bound=None, upper_bound=None, subject_categories=None):
     data_subset = data[data['Subjects'].isin(subjects) & data['Events'].isin(events)]
     
     if lower_bound and upper_bound:
         data_subset = data_subset[(data_subset[measure] >= lower_bound) & (data_subset[measure] <= upper_bound)]
 
-    fig = px.violin(data_subset, x=x_var, y=measure, color='Events', box=True, points="all", hover_data=['Subjects', 'Events'])
+    fig = px.violin(data_subset, x=x_var, y=measure, color=data_subset['Subjects'].map(subject_categories), box=True, points="all", hover_data=['Subjects', 'Events'])
     st.plotly_chart(fig)
 
     
-def plot_swarm(data, subjects, events, measure, x_var='Subjects', lower_bound=None, upper_bound=None):
+def plot_swarm(data, subjects, events, measure, x_var='Subjects', lower_bound=None, upper_bound=None, subject_categories=None):
     data_subset = data[data['Subjects'].isin(subjects) & data['Events'].isin(events)]
     
     if lower_bound and upper_bound:
         data_subset = data_subset[(data_subset[measure] >= lower_bound) & (data_subset[measure] <= upper_bound)]
 
     plt.figure(figsize=(14, 7))
-    sns.swarmplot(data=data_subset, x=x_var, y=measure, hue='Events')
+    sns.swarmplot(data=data_subset, x=x_var, y=measure, hue=data_subset['Subjects'].map(subject_categories))
     plt.title(f"Swarm plot of {measure} across {x_var}")
     st.pyplot()
     plt.close()
 
-def plot_facet(data, subjects, events, measure):
+def plot_facet(data, subjects, events, measure, subject_categories=None):
     data_subset = data[data['Subjects'].isin(subjects) & data['Events'].isin(events)]
-    fig = px.line(data_subset, x='Segments', y=measure, color='Events', facet_col='Subjects', hover_data=['Subjects', 'Events'])
+    fig = px.line(data_subset, x='Segments', y=measure, color=data_subset['Subjects'].map(subject_categories), facet_col='Subjects', hover_data=['Subjects', 'Events'])
     st.plotly_chart(fig)
     
-def plot_full_line_plot(data, measure):
-    fig = px.line(data, x='Events', y=measure, color='Subjects', 
-                  title=f"{measure} across Events for full subjects", 
-                  labels={'Events': 'Events', measure: measure}, 
-                  hover_data=['Subjects', 'Events'])
+def plot_full_line_plot(data, measure, full_subject_categories=None):
+    fig = px.line(data, x='Events', y=measure, color=data['Subjects'].map(full_subject_categories), title=f"{measure} across Events for full subjects", hover_data=['Subjects', 'Events'])
     st.plotly_chart(fig)
 
 
@@ -111,24 +109,28 @@ def plot_full_data_bar(data, measure):
     fig = px.bar(data, x='Subjects', y=measure, color='Events', title=f"{measure} for Full Subjects")
     st.plotly_chart(fig)
 
-def plot_full_data_box(data, measure):
-    fig = px.box(data, x='Events', y=measure, title=f"Box Plot of {measure} for Full Subjects")
+def plot_full_data_box(data, measure, full_subject_categories):
+    # Modify the box color based on full_subject_categories
+    fig = px.box(data, x='Events', y=measure, color=data['Subjects'].map(full_subject_categories),
+                 title=f"Box Plot of {measure} for Full Subjects")
     st.plotly_chart(fig)
 
-def plot_full_data_violin(data, measure):
-    fig = px.violin(data, x='Events', y=measure, box=True, points="all", title=f"Violin Plot of {measure} for Full Subjects")
+def plot_full_data_violin(data, measure, full_subject_categories=None):
+    fig = px.violin(data, x='Events', y=measure, color=data['Subjects'].map(full_subject_categories), box=True, points="all", title=f"Violin Plot of {measure} for Full Subjects")
     st.plotly_chart(fig)
 
-def plot_full_data_histogram(data, measure):
-    fig = px.histogram(data, x=measure, color='Events', title=f"Histogram of {measure} for Full Subjects")
+def plot_full_data_histogram(data, measure, full_subject_categories=None):
+    fig = px.histogram(data, x=measure, color=data['Subjects'].map(full_subject_categories), title=f"Histogram of {measure} for Full Subjects")
     st.plotly_chart(fig)
 
-def plot_full_data_swarm(data, measure):
+def plot_full_data_swarm(data, measure, full_subject_categories=None):
     plt.figure(figsize=(14, 7))
-    sns.swarmplot(data=data, x='Events', y=measure)
+    sns.swarmplot(data=data, x='Events', y=measure, hue=data['Subjects'].map(full_subject_categories))
     plt.title(f"Swarm plot of {measure} for Full Subjects")
     st.pyplot()
     plt.close()
+
+
 
 def main():
     st.title("Visualization App for Total_segments_Val.csv")
@@ -151,6 +153,18 @@ def main():
             st.warning("Please upload a CSV file.")
             return  # This ensures the rest of the code doesn't run until a file is uploaded
 
+        # Filter data for MAST and rest baseline events
+    mast_data = data[data['Events'] == 'MAST']
+    baseline_data = data[data['Events'] == 'rest baseline']
+
+    # Calculate the difference in measurements between MAST and rest baseline
+    difference_data = mast_data.set_index('Subjects')[['RMSSD', 'SDNN']] - baseline_data.set_index('Subjects')[['RMSSD', 'SDNN']]
+    difference_data.reset_index(inplace=True)
+
+    # Calculate the z-score of the differences
+    difference_data['RMSSD_zscore'] = stats.zscore(difference_data['RMSSD'])
+    difference_data['SDNN_zscore'] = stats.zscore(difference_data['SDNN'])
+
     st.write(data.head())
     
     st.markdown("## Transform Segment Data")
@@ -166,7 +180,17 @@ def main():
             else:
                 st.warning("Unable to revert the log transformation. Please reload or re-upload the original data.")
     
-    
+    st.markdown("## Categorize Subjects Based on Z-Score")
+    zscore_threshold = st.slider("Set Z-Score Threshold for Categorization", min_value=0.0, max_value=3.0, value=1.96)
+
+    # Categorize subjects as "affected" or "unaffected" based on the z-score threshold
+    difference_data['RMSSD_category'] = difference_data['RMSSD_zscore'].apply(lambda x: 'affected' if abs(x) > zscore_threshold else 'unaffected')
+    difference_data['SDNN_category'] = difference_data['SDNN_zscore'].apply(lambda x: 'affected' if abs(x) > zscore_threshold else 'unaffected')
+
+    # Display the categorized subjects
+    st.write("Categorized Subjects based on RMSSD:", difference_data[['Subjects', 'RMSSD_category']])
+    st.write("Categorized Subjects based on SDNN:", difference_data[['Subjects', 'SDNN_category']])
+
     all_full_subjects = data[data['Subjects'].str.startswith('Full_')]['Subjects'].unique().tolist()
     all_segmented_subjects = data[~data['Subjects'].str.startswith('Full_')]['Subjects'].unique().tolist()
     selected_segmented_subjects = st.multiselect('Select Segmented Subjects', all_segmented_subjects, default=all_segmented_subjects)
@@ -183,6 +207,7 @@ def main():
     selected_segments = st.multiselect('Select Segments', relevant_segments, default=[s for s in selected_segments if s in relevant_segments])
     filtered_data = filtered_data[filtered_data['Segments'].isin(selected_segments)]
     
+
     measurements = ['RMSSD', 'SDNN','MHR']
     selected_measurements = st.selectbox('Select Measurements', measurements, index=0)
 
@@ -195,20 +220,23 @@ def main():
         lower_bound = st.number_input('Enter Lower Bound for Outliers', value=data[selected_measurements].quantile(0.20))
         upper_bound = st.number_input('Enter Upper Bound for Outliers', value=data[selected_measurements].quantile(0.80))
 
+    # Create subject_categories dictionary for segmented subjects
+    subject_categories = dict(zip(difference_data['Subjects'], difference_data['RMSSD_category']))
+    # Pass subject_categories to the plotting functions
     if st.button("Generate Plot"):
         if selected_plot == "Line Plot":
-            plot_line(filtered_data, selected_segmented_subjects, selected_events, selected_measurements, lower_bound, upper_bound)
+            plot_line(filtered_data, selected_segmented_subjects, selected_events, selected_measurements, lower_bound, upper_bound, subject_categories)
         elif selected_plot == "(corrected) Line Plot 3d":
             plot_line_3d(filtered_data, selected_segmented_subjects, selected_events, selected_measurements, lower_bound, upper_bound)
         elif selected_plot == "Box Plot":
             plot_box(filtered_data, selected_segmented_subjects, selected_events, selected_measurements, x_var='Events', lower_bound=lower_bound, upper_bound=upper_bound)
         elif selected_plot == "Violin Plot":
-            plot_violin(filtered_data, selected_segmented_subjects, selected_events, selected_measurements, x_var='Events', lower_bound=lower_bound, upper_bound=upper_bound)
+            plot_violin(filtered_data, selected_segmented_subjects, selected_events, selected_measurements, x_var='Events', lower_bound=lower_bound, upper_bound=upper_bound, subject_categories=subject_categories)
         elif selected_plot == "Swarm Plot":
-            plot_swarm(filtered_data, selected_segmented_subjects, selected_events, selected_measurements, x_var='Events', lower_bound=lower_bound, upper_bound=upper_bound)
+            plot_swarm(filtered_data, selected_segmented_subjects, selected_events, selected_measurements, x_var='Events', lower_bound=lower_bound, upper_bound=upper_bound, subject_categories=subject_categories)
         elif selected_plot == "Facet Grid":
-            plot_facet(filtered_data, selected_segmented_subjects, selected_events, selected_measurements)
-   
+            plot_facet(filtered_data, selected_segmented_subjects, selected_events, selected_measurements, subject_categories=subject_categories)
+
 
     st.markdown("## Visualization for non-segmented Data")
     st.markdown("## Transform non-segmented Data")
@@ -239,18 +267,21 @@ def main():
     selected_full_events = st.multiselect('Select Events for Full Data', all_full_events, default=all_full_events)
     filtered_full_data = full_data[full_data['Subjects'].isin(selected_full_subjects) & full_data['Events'].isin(selected_full_events)]
 
+    
+    # Create full_subject_categories dictionary for non-segmented subjects
+    full_subject_categories = dict(zip(difference_data['Subjects'], difference_data['RMSSD_category']))
+    # Pass full_subject_categories to the full data plotting functions
     if st.button("Generate Full Data Plot"):
-        # Depending on the type of plot selected, call the appropriate function
         if selected_full_plot == "Box Plot":
-            plot_full_data_box(filtered_full_data, selected_full_measurement)
+            plot_full_data_box(filtered_full_data, selected_full_measurement, full_subject_categories)
         elif selected_full_plot == "Violin Plot":
-            plot_full_data_violin(filtered_full_data, selected_full_measurement)
+            plot_full_data_violin(filtered_full_data, selected_full_measurement, full_subject_categories)
         elif selected_full_plot == "Histogram":
-            plot_full_data_histogram(filtered_full_data, selected_full_measurement)
+            plot_full_data_histogram(filtered_full_data, selected_full_measurement, full_subject_categories)
         elif selected_full_plot == "Swarm Plot":
-            plot_full_data_swarm(filtered_full_data, selected_full_measurement)
+            plot_full_data_swarm(filtered_full_data, selected_full_measurement, full_subject_categories)
         elif selected_full_plot == "Plot Line":
-            plot_full_line_plot(filtered_full_data, selected_full_measurement)
-            
+            plot_full_line_plot(filtered_full_data, selected_full_measurement, full_subject_categories)
+
 if __name__ == "__main__":
     main()
