@@ -270,59 +270,7 @@ def resilience_sustainability_page():
     # Scenario 3 vs Scenario 1
     st.markdown(f"### Percentage Change in {measurement}: Scenario 3 vs Scenario 1")
     plot_with_threshold(change_sc3_sc1, "Scenario 3 vs Scenario 1", measurement, threshold)
-  
-    for measure in ['SDNN', 'RMSSD', 'MHR']:
-        # Calculate the binned data for the measure
-        binned_data = pd.cut(full_data[measure], bins=5)
-        
-        # Identify the bins containing subjects above the threshold
-        high_threshold_bins = full_data.loc[full_data['HRV_Category'] == 'High', measure].apply(lambda x: binned_data.cat.categories.get_loc(x))
-        
-        # Create a heatmap with highlighted bins
-        heatmap_data = pd.crosstab(index=binned_data, columns=full_data['HRV_Category'])
-        fig, ax = plt.subplots(figsize=(10, 6))
-        
-        # Define the colors for the heatmap: 'red' for bins above the threshold, 'blue' for others
-        colors = np.array([['blue'] * heatmap_data.shape[1]] * heatmap_data.shape[0])
-        for bin_index in high_threshold_bins:
-            colors[bin_index, :] = 'red'
-        
-        sns.heatmap(heatmap_data, annot=True, fmt='d', cmap='Blues', ax=ax)
-        plt.title(f'Heatmap of HRV Categories vs {measure} Bins')
-        plt.xlabel('HRV Category')
-        plt.ylabel(f'{measure} Bins')
-        st.pyplot(fig)
-        plt.close()    # Heatmap Visualization for SDNN
-        
-    heatmap_data_sdnn = pd.crosstab(index=pd.cut(full_data['SDNN'], bins=5), columns=full_data['HRV_Category'])
-    fig, ax = plt.subplots(figsize=(10, 6))
-    sns.heatmap(heatmap_data_sdnn, annot=True, fmt='d', cmap='Blues', ax=ax)
-    plt.title('Heatmap of HRV Categories vs SDNN Bins')
-    plt.xlabel('HRV Category')
-    plt.ylabel('SDNN Bins')
-    st.pyplot(fig)
-    plt.close()
-    
-    # Heatmap Visualization for RMSSD
-    heatmap_data_rmssd = pd.crosstab(index=pd.cut(full_data['RMSSD'], bins=5), columns=full_data['HRV_Category'])
-    fig, ax = plt.subplots(figsize=(10, 6))
-    sns.heatmap(heatmap_data_rmssd, annot=True, fmt='d', cmap='Blues', ax=ax)
-    plt.title('Heatmap of HRV Categories vs RMSSD Bins')
-    plt.xlabel('HRV Category')
-    plt.ylabel('RMSSD Bins')
-    st.pyplot(fig)
-    plt.close()
-    
-    # Heatmap Visualization for MHR
-    heatmap_data_mhr = pd.crosstab(index=pd.cut(full_data['MHR'], bins=5), columns=full_data['HRV_Category'])
-    fig, ax = plt.subplots(figsize=(10, 6))
-    sns.heatmap(heatmap_data_mhr, annot=True, fmt='d', cmap='Blues', ax=ax)
-    plt.title('Heatmap of HRV Categories vs MHR Bins')
-    plt.xlabel('HRV Category')
-    plt.ylabel('MHR Bins')
-    st.pyplot(fig)
-    plt.close()
-    
+
 def load_data():
     """
     Load the data for the application.
