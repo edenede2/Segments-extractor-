@@ -158,7 +158,7 @@ def resilience_sustainability_page():
     # Filter only full (non-segmented) subjects
     full_data = data[data['Subjects'].str.startswith('Full_')]
     
-    threshold = st.slider("Set Threshold for Categorization as Resilient (%)", min_value=0, max_value=100, value=10)
+    threshold = st.slider("Set Threshold for Highlighting Significant Change (%)", min_value=0, max_value=100, value=10)
     
     # Allow user to select the measurement they want to visualize
     measurement = st.selectbox("Select Measurement:", ['RMSSD', 'SDNN', 'MHR'])
@@ -169,37 +169,35 @@ def resilience_sustainability_page():
     # Categorize full subjects based on the calculated percentage change
     change_sc2_sc1, change_sc3_sc1 = categorize_subjects(change_sc2_sc1, change_sc3_sc1, threshold)
 
-    # Combine Scatter and Bar plots into subplots for each scenario
+    def plot_with_threshold(change_data, scenario, measurement, threshold):
+        # Define colors based on threshold
+        colors = ['#d62728' if abs(val) > threshold else '#1f77b4' for val in change_data[measurement]]
+        
+        fig = sp.make_subplots(rows=1, cols=2, subplot_titles=("Scatter Plot", "Bar Plot"))
+        
+        # Scatter plot
+        scatter_trace = go.Scatter(x=change_data['Subjects'], y=change_data[measurement], mode='markers', marker=dict(color=colors))
+        fig.add_trace(scatter_trace, row=1, col=1)
+        
+        # Bar plot
+        bar_trace = go.Bar(x=change_data['Subjects'], y=change_data[measurement], marker=dict(color=colors))
+        fig.add_trace(bar_trace, row=1, col=2)
+        
+        # Add reference line
+        for col in range(1, 3):
+            fig.add_shape(go.layout.Shape(type='line', y0=threshold, y1=threshold, xref='paper', x0=0, x1=1, line=dict(color='gray', dash='dash')), row=1, col=col)
+            fig.add_shape(go.layout.Shape(type='line', y0=-threshold, y1=-threshold, xref='paper', x0=0, x1=1, line=dict(color='gray', dash='dash')), row=1, col=col)
+        
+        fig.update_layout(title_text=f'Percentage Change in {measurement}: {scenario}')
+        st.plotly_chart(fig)
     
     # Scenario 2 vs Scenario 1
     st.markdown(f"### Percentage Change in {measurement}: Scenario 2 vs Scenario 1")
-    
-    fig1 = sp.make_subplots(rows=1, cols=2, subplot_titles=("Scatter Plot", "Bar Plot"))
-    
-    scatter_trace1 = px.scatter(change_sc2_sc1, x='Subjects', y=measurement).data[0]
-    bar_trace1 = px.bar(change_sc2_sc1, x='Subjects', y=measurement).data[0]
-    
-    fig1.add_trace(scatter_trace1, row=1, col=1)
-    fig1.add_trace(bar_trace1, row=1, col=2)
-    
-    fig1.update_layout(title_text=f'Percentage Change in {measurement}: Scenario 2 vs Scenario 1')
-    
-    st.plotly_chart(fig1)
+    plot_with_threshold(change_sc2_sc1, "Scenario 2 vs Scenario 1", measurement, threshold)
     
     # Scenario 3 vs Scenario 1
     st.markdown(f"### Percentage Change in {measurement}: Scenario 3 vs Scenario 1")
-    
-    fig2 = sp.make_subplots(rows=1, cols=2, subplot_titles=("Scatter Plot", "Bar Plot"))
-    
-    scatter_trace2 = px.scatter(change_sc3_sc1, x='Subjects', y=measurement).data[0]
-    bar_trace2 = px.bar(change_sc3_sc1, x='Subjects', y=measurement).data[0]
-    
-    fig2.add_trace(scatter_trace2, row=1, col=1)
-    fig2.add_trace(bar_trace2, row=1, col=2)
-    
-    fig2.update_layout(title_text=f'Percentage Change in {measurement}: Scenario 3 vs Scenario 1')
-    
-    st.plotly_chart(fig2)
+    plot_with_threshold(change_sc3_sc1, "Scenario 3 vs Scenario 1", measurement, threshold)
     
 def load_data():
     """
