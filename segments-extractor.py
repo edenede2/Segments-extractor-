@@ -166,8 +166,7 @@ def resilience_sustainability_page():
     hrv_threshold = mean_hrv.mean()
 
     # Categorize subjects based on the HRV threshold
-    full_data = full_data.copy()
-    full_data.loc[:, 'HRV_Category'] = mean_hrv.apply(lambda x: 'High' if x >= hrv_threshold else 'Low').reindex(full_data['Subjects']).reset_index(drop=True)
+    full_data['HRV_Category'] = mean_hrv.apply(lambda x: 'High' if x >= hrv_threshold else 'Low').reindex(full_data['Subjects']).reset_index(drop=True)
 
     threshold = st.slider("Set Threshold for Highlighting Significant Change (%)", min_value=0, max_value=100, value=10)
     
@@ -180,23 +179,8 @@ def resilience_sustainability_page():
     # Categorize full subjects based on the calculated percentage change
     change_sc2_sc1, change_sc3_sc1 = categorize_subjects(change_sc2_sc1, change_sc3_sc1, threshold)
     
-    def plot_with_threshold(change_data, scenario, measurement, threshold, full_data):
-        # Check for duplicate subjects in change_data
-        duplicate_subjects = change_data[change_data.duplicated('Subjects', keep=False)]
-        if not duplicate_subjects.empty:
-            st.warning("Found duplicate subjects in change_data. Please check the data.")
-            st.write(duplicate_subjects)
-            # Drop duplicate rows based on the 'Subjects' column
-            change_data = change_data.drop_duplicates(subset='Subjects', keep=False)
-        
-        # Check for duplicate subjects in full_data
-        duplicate_subjects_full = full_data[full_data.duplicated('Subjects', keep=False)]
-        if not duplicate_subjects_full.empty:
-            st.warning("Found duplicate subjects in full_data. Please check the data.")
-            st.write(duplicate_subjects_full)
-            # Drop duplicate rows based on the 'Subjects' column
-            full_data = full_data.drop_duplicates(subset='Subjects', keep=False)
-
+    def plot_with_threshold(change_data, scenario, measurement, threshold):
+        # Define colors based on HRV_Category
         colors = full_data.set_index('Subjects')['HRV_Category'].map({'High': 'red', 'Low': 'blue'}).reindex(change_data['Subjects']).reset_index(drop=True)
         
         # Calculate the percentage of subjects under the threshold
@@ -270,14 +254,20 @@ def resilience_sustainability_page():
         fig.update_layout(title_text=f'Percentage Change in {measurement}: {scenario}')
         st.plotly_chart(fig)
 
-        # Scenario 2 vs Scenario 1
+     # Scenario 2 vs Scenario 1
     st.markdown(f"### Percentage Change in {measurement}: Scenario 2 vs Scenario 1")
-    plot_with_threshold(change_sc2_sc1, "Scenario 2 vs Scenario 1", measurement, threshold, full_data)
-        
+    plot_with_threshold(change_sc2_sc1, "Scenario 2 vs Scenario 1", measurement, threshold)
+    
     # Scenario 3 vs Scenario 1
     st.markdown(f"### Percentage Change in {measurement}: Scenario 3 vs Scenario 1")
-    plot_with_threshold(change_sc3_sc1, "Scenario 3 vs Scenario 1", measurement, threshold, full_data)
-
+    plot_with_threshold(change_sc3_sc1, "Scenario 3 vs Scenario 1", measurement, threshold)
+     # Scenario 2 vs Scenario 1
+    st.markdown(f"### Percentage Change in {measurement}: Scenario 2 vs Scenario 1")
+    plot_with_threshold(change_sc2_sc1, "Scenario 2 vs Scenario 1", measurement, threshold)
+    
+    # Scenario 3 vs Scenario 1
+    st.markdown(f"### Percentage Change in {measurement}: Scenario 3 vs Scenario 1")
+    plot_with_threshold(change_sc3_sc1, "Scenario 3 vs Scenario 1", measurement, threshold)
     
     # Define bins for HRV and resilience values
     hrv_bins = pd.cut(mean_hrv, bins=[0, hrv_threshold, mean_hrv.max()], labels=['Low', 'High'])
