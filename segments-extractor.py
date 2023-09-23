@@ -172,9 +172,12 @@ def resilience_sustainability_page():
     
     
 
-    def plot_with_threshold(change_data, scenario, measurement, threshold):
+   def plot_with_threshold(change_data, scenario, measurement, threshold):
         # Define colors based on threshold
         colors = ['#d62728' if abs(val) > threshold else '#1f77b4' for val in change_data[measurement]]
+    
+        # Calculate the percentage of subjects under the threshold
+        under_threshold_percentage = len(change_data[abs(change_data[measurement]) <= threshold]) / len(change_data) * 100
     
         fig = sp.make_subplots(rows=1, cols=2, subplot_titles=("Scatter Plot", "Bar Plot"))
     
@@ -186,22 +189,39 @@ def resilience_sustainability_page():
         bar_trace = go.Bar(x=change_data['Subjects'], y=change_data[measurement], marker=dict(color=colors))
         fig.add_trace(bar_trace, row=1, col=2)
     
-        # Add shaded region to highlight the area beyond the threshold
+        # Add reference line
         for col in range(1, 3):
-            fig.add_shape(go.layout.Shape(type='rect', y0=threshold, y1=max(change_data[measurement]) + 1, xref='paper', x0=0, x1=1, fillcolor='rgba(255,0,0,0.2)', line=dict(width=0), layer='below'), row=1, col=col)
-            fig.add_shape(go.layout.Shape(type='rect', y0=min(change_data[measurement]) - 1, y1=-threshold, xref='paper', x0=0, x1=1, fillcolor='rgba(255,0,0,0.2)', line=dict(width=0), layer='below'), row=1, col=col)
+            fig.add_shape(go.layout.Shape(type='line', y0=threshold, y1=threshold, xref='paper', x0=0, x1=1, line=dict(color='gray', dash='dash')), row=1, col=col)
+            fig.add_shape(go.layout.Shape(type='line', y0=-threshold, y1=-threshold, xref='paper', x0=0, x1=1, line=dict(color='gray', dash='dash')), row=1, col=col)
+    
+        # Add annotation with percentage under the threshold
+        fig.add_annotation(
+            text=f"{under_threshold_percentage:.2f}% under threshold",
+            xanchor='right',
+            x=1,
+            yanchor='top',
+            y=1,
+            showarrow=False,
+            font=dict(size=12, color='black'),
+            bgcolor='rgba(255, 255, 255, 0.8)',
+            bordercolor='black',
+            borderwidth=1,
+            borderpad=4
+        )
     
         fig.update_layout(title_text=f'Percentage Change in {measurement}: {scenario}')
         st.plotly_chart(fig)
-    
+
     # Scenario 2 vs Scenario 1
     st.markdown(f"### Percentage Change in {measurement}: Scenario 2 vs Scenario 1")
-    plot_with_threshold(change_sc2_sc1, "Scenario 2 vs Scenario 1", measurement, threshold)
-    
+    under_threshold_percentage = plot_with_threshold(change_sc2_sc1, "Scenario 2 vs Scenario 1", measurement, threshold)
+    st.write(f"Percentage of subjects under the threshold: {under_threshold_percentage:.2f}%")
+
     # Scenario 3 vs Scenario 1
     st.markdown(f"### Percentage Change in {measurement}: Scenario 3 vs Scenario 1")
-    plot_with_threshold(change_sc3_sc1, "Scenario 3 vs Scenario 1", measurement, threshold)
-    
+    under_threshold_percentage = plot_with_threshold(change_sc3_sc1, "Scenario 3 vs Scenario 1", measurement, threshold)
+    st.write(f"Percentage of subjects under the threshold: {under_threshold_percentage:.2f}%")
+
 def load_data():
     """
     Load the data for the application.
