@@ -153,10 +153,17 @@ def plot_full_data_swarm(data, measure, full_subject_categories=None):
 def resilience_sustainability_page():
     st.title("Resilience and Sustainability Analysis")
     
+    # Load the data
     data = load_data()
+    
+    # Debug: Print all unique subjects after loading the data
+    st.write("All unique subjects after loading:", data['Subjects'].unique().tolist())
     
     # Filter only full (non-segmented) subjects
     full_data = data[data['Subjects'].str.startswith('Full_')]
+    
+    # Debug: Print all unique full subjects after filtering
+    st.write("All unique full subjects after filtering:", full_data['Subjects'].unique().tolist())
     
     threshold = st.slider("Set Threshold for Highlighting Significant Change (%)", min_value=0, max_value=100, value=10)
     
@@ -166,8 +173,17 @@ def resilience_sustainability_page():
     # Calculate percentage change for full subjects only
     change_sc2_sc1, change_sc3_sc1 = calculate_percentage_change(full_data)
     
+    # Debug: Print all unique subjects after calculating percentage change
+    st.write("All unique subjects after calculating percentage change (Scenario 2 vs Scenario 1):", change_sc2_sc1['Subjects'].unique().tolist())
+    st.write("All unique subjects after calculating percentage change (Scenario 3 vs Scenario 1):", change_sc3_sc1['Subjects'].unique().tolist())
+    
     # Categorize full subjects based on the calculated percentage change
     change_sc2_sc1, change_sc3_sc1 = categorize_subjects(change_sc2_sc1, change_sc3_sc1, threshold)
+    
+    # Debug: Print all unique subjects after categorizing
+    st.write("All unique subjects after categorizing (Scenario 2 vs Scenario 1):", change_sc2_sc1['Subjects'].unique().tolist())
+    st.write("All unique subjects after categorizing (Scenario 3 vs Scenario 1):", change_sc3_sc1['Subjects'].unique().tolist())
+    
 
     def plot_with_threshold(change_data, scenario, measurement, threshold):
         # Define colors based on threshold
