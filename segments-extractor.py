@@ -180,16 +180,22 @@ def main():
             else:
                 st.warning("Unable to revert the log transformation. Please reload or re-upload the original data.")
     
-    st.markdown("## Categorize Subjects Based on Z-Score")
-    zscore_threshold = st.slider("Set Z-Score Threshold for Categorization", min_value=0.0, max_value=3.0, value=1.96)
+    # Checkbox to show/hide categorized subjects
+    show_categorized_subjects = st.checkbox("Show Categorized Subjects", value=True)
+    
+    # Calculate and show categorized subjects only if the checkbox is checked
+    if show_categorized_subjects:
+        st.markdown("## Categorize Subjects Based on Z-Score")
+        zscore_threshold = st.slider("Set Z-Score Threshold for Categorization", min_value=0.0, max_value=3.0, value=1.96)
 
-    # Categorize subjects as "affected" or "unaffected" based on the z-score threshold
-    difference_data['RMSSD_category'] = difference_data['RMSSD_zscore'].apply(lambda x: 'affected' if abs(x) > zscore_threshold else 'unaffected')
-    difference_data['SDNN_category'] = difference_data['SDNN_zscore'].apply(lambda x: 'affected' if abs(x) > zscore_threshold else 'unaffected')
+        # Categorize subjects as "affected" or "unaffected" based on the z-score threshold
+        difference_data['RMSSD_category'] = difference_data['RMSSD_zscore'].apply(lambda x: 'affected' if abs(x) > zscore_threshold else 'unaffected')
+        difference_data['SDNN_category'] = difference_data['SDNN_zscore'].apply(lambda x: 'affected' if abs(x) > zscore_threshold else 'unaffected')
 
-    # Display the categorized subjects
-    st.write("Categorized Subjects based on RMSSD:", difference_data[['Subjects', 'RMSSD_category']])
-    st.write("Categorized Subjects based on SDNN:", difference_data[['Subjects', 'SDNN_category']])
+        # Display the categorized subjects
+        st.write("Categorized Subjects based on RMSSD:", difference_data[['Subjects', 'RMSSD_category']])
+        st.write("Categorized Subjects based on SDNN:", difference_data[['Subjects', 'SDNN_category']])
+    
 
     all_full_subjects = data[data['Subjects'].str.startswith('Full_')]['Subjects'].unique().tolist()
     all_segmented_subjects = data[~data['Subjects'].str.startswith('Full_')]['Subjects'].unique().tolist()
