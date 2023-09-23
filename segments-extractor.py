@@ -8,7 +8,7 @@ import numpy as np
 import warnings
 warnings.filterwarnings("ignore", category=FutureWarning)
 import scipy.stats as stats
-
+import plotly.subplots as sp
 
 def transform_to_log(data, measurements):
 
@@ -169,29 +169,37 @@ def resilience_sustainability_page():
     # Categorize full subjects based on the calculated percentage change
     change_sc2_sc1, change_sc3_sc1 = categorize_subjects(change_sc2_sc1, change_sc3_sc1, threshold)
 
-    # Visualize the calculated percentage change and categories for the selected measurement
+    # Combine Scatter and Bar plots into subplots for each scenario
     
-    # Visualization of Percentage Change for Scenario 2 vs Scenario 1
+    # Scenario 2 vs Scenario 1
     st.markdown(f"### Percentage Change in {measurement}: Scenario 2 vs Scenario 1")
     
-    # Scatter Plot
-    fig1 = px.scatter(change_sc2_sc1, x='Subjects', y=measurement, title=f'Percentage Change in {measurement}: Scenario 2 vs Scenario 1')
+    fig1 = sp.make_subplots(rows=1, cols=2, subplot_titles=("Scatter Plot", "Bar Plot"))
+    
+    scatter_trace1 = px.scatter(change_sc2_sc1, x='Subjects', y=measurement).data[0]
+    bar_trace1 = px.bar(change_sc2_sc1, x='Subjects', y=measurement).data[0]
+    
+    fig1.add_trace(scatter_trace1, row=1, col=1)
+    fig1.add_trace(bar_trace1, row=1, col=2)
+    
+    fig1.update_layout(title_text=f'Percentage Change in {measurement}: Scenario 2 vs Scenario 1')
+    
     st.plotly_chart(fig1)
     
-    # Bar Plot
-    fig2 = px.bar(change_sc2_sc1, x='Subjects', y=measurement, title=f'Percentage Change in {measurement}: Scenario 2 vs Scenario 1')
-    st.plotly_chart(fig2)
-    
-    # Visualization of Percentage Change for Scenario 3 vs Scenario 1
+    # Scenario 3 vs Scenario 1
     st.markdown(f"### Percentage Change in {measurement}: Scenario 3 vs Scenario 1")
     
-    # Scatter Plot
-    fig3 = px.scatter(change_sc3_sc1, x='Subjects', y=measurement, title=f'Percentage Change in {measurement}: Scenario 3 vs Scenario 1')
-    st.plotly_chart(fig3)
+    fig2 = sp.make_subplots(rows=1, cols=2, subplot_titles=("Scatter Plot", "Bar Plot"))
     
-    # Bar Plot
-    fig4 = px.bar(change_sc3_sc1, x='Subjects', y=measurement, title=f'Percentage Change in {measurement}: Scenario 3 vs Scenario 1')
-    st.plotly_chart(fig4)
+    scatter_trace2 = px.scatter(change_sc3_sc1, x='Subjects', y=measurement).data[0]
+    bar_trace2 = px.bar(change_sc3_sc1, x='Subjects', y=measurement).data[0]
+    
+    fig2.add_trace(scatter_trace2, row=1, col=1)
+    fig2.add_trace(bar_trace2, row=1, col=2)
+    
+    fig2.update_layout(title_text=f'Percentage Change in {measurement}: Scenario 3 vs Scenario 1')
+    
+    st.plotly_chart(fig2)
     
 def load_data():
     """
