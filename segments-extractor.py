@@ -18,6 +18,26 @@ def transform_to_log(data, measurements):
     return transformed_data
 
 
+
+def calculate_percentage_change(data):
+    scenario1_data = data[data['Events'] == 'scenario 1']
+    scenario2_data = data[data['Events'] == 'scenario 2']
+    scenario3_data = data[data['Events'] == 'scenario 3']
+
+    change_sc2_sc1 = ((scenario2_data.set_index('Subjects')[['RMSSD', 'SDNN', 'MHR']] - scenario1_data.set_index('Subjects')[['RMSSD', 'SDNN', 'MHR']]) / scenario1_data.set_index('Subjects')[['RMSSD', 'SDNN', 'MHR']]) * 100
+    change_sc3_sc1 = ((scenario3_data.set_index('Subjects')[['RMSSD', 'SDNN', 'MHR']] - scenario1_data.set_index('Subjects')[['RMSSD', 'SDNN', 'MHR']]) / scenario1_data.set_index('Subjects')[['RMSSD', 'SDNN', 'MHR']]) * 100
+
+    change_sc2_sc1.reset_index(inplace=True)
+    change_sc3_sc1.reset_index(inplace=True)
+    
+    return change_sc2_sc1, change_sc3_sc1
+
+def categorize_subjects(change_sc2_sc1, change_sc3_sc1, threshold):
+    change_sc2_sc1['Category'] = change_sc2_sc1[['RMSSD', 'SDNN', 'MHR']].apply(lambda row: 'resilient' if max(abs(row)) <= threshold else 'sustainable', axis=1)
+    change_sc3_sc1['Category'] = change_sc3_sc1[['RMSSD', 'SDNN', 'MHR']].apply(lambda row: 'resilient' if max(abs(row)) <= threshold else 'sustainable', axis=1)
+    
+    return change_sc2_sc1, change_sc3_sc1
+
 def plot_line_3d(data, subjects, events, measure, lower_bound, upper_bound):
     data_subset = data[data['Subjects'].isin(subjects) & data['Events'].isin(events)]
     
@@ -130,19 +150,37 @@ def plot_full_data_swarm(data, measure, full_subject_categories=None):
     st.pyplot()
     plt.close()
 
+def resilience_sustainability_page():
+    st.title("Resilience and Sustainability Analysis")
+    
+    data = load_data()
+    
+    threshold = st.slider("Set Threshold for Categorization as Resilient (%)", min_value=0, max_value=100, value=10)
+
+    change_sc2_sc1, change_sc3_sc1 = calculate_percentage_change(data)
+    change_sc2_sc1, change_sc3_sc1 = categorize_subjects(change_sc2_sc1, change_sc3_sc1, threshold)
+
+    # Visualize the calculated percentage change and categories
+    # You can use plotly or seaborn for visualization based on your preference
 
 
-def main():
+def load_data():
+    """
+    Load the data for the application.
+    Return the loaded DataFrame.
+    """
+    data = pd.read_csv('Total_segments_Val.csv')
+    return data    
+
+def main_page():
     st.title("Visualization App for Total_segments_Val.csv")
-    original_data = None
+    data = load_data()
+    original_data = data.copy()
+    
     file_option = st.radio("Choose a CSV file source:", ["Use default file", "Upload my own file"])
     
     if file_option == "Use default file":
-        data = pd.read_csv('Total_segments_Val.csv')
-        original_data = data.copy()
-        full_data = data[data['Subjects'].str.startswith("Full_")]
         st.write("Preview of the Default Data")
-        original_data = data.copy()
     elif file_option == "Upload my own file":
         uploaded_file = st.file_uploader("Upload a CSV file", type="csv")
         if uploaded_file:
@@ -288,6 +326,15 @@ def main():
             plot_full_data_swarm(filtered_full_data, selected_full_measurement, full_subject_categories)
         elif selected_full_plot == "Plot Line":
             plot_full_line_plot(filtered_full_data, selected_full_measurement, full_subject_categories)
+
+def main():
+    st.sidebar.title("Navigation")
+    page = st.sidebar.radio("Go to", ["Main Page", "Resilience and Sustainability Analysis"])
+    
+    if page == "Main Page":
+        main_page()
+    elif page == "Resilience and Sustainability Analysis":
+        resilience_sustainability_page()
 
 if __name__ == "__main__":
     main()
