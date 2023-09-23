@@ -164,6 +164,26 @@ def resilience_sustainability_page():
     # You can use plotly or seaborn for visualization based on your preference
 
 
+    # Visualization of Percentage Change for Scenario 2 vs Scenario 1
+    st.markdown("### Percentage Change: Scenario 2 vs Scenario 1")
+    fig1 = px.bar(change_sc2_sc1, x='Subjects', y=['RMSSD', 'SDNN', 'MHR'], title='Percentage Change in Measurements: Scenario 2 vs Scenario 1')
+    st.plotly_chart(fig1)
+
+    # Visualization of Categories for Scenario 2 vs Scenario 1
+    st.markdown("### Categories: Scenario 2 vs Scenario 1")
+    fig2 = px.histogram(change_sc2_sc1, x='Category', title='Number of Subjects in Each Category: Scenario 2 vs Scenario 1')
+    st.plotly_chart(fig2)
+
+    # Visualization of Percentage Change for Scenario 3 vs Scenario 1
+    st.markdown("### Percentage Change: Scenario 3 vs Scenario 1")
+    fig3 = px.bar(change_sc3_sc1, x='Subjects', y=['RMSSD', 'SDNN', 'MHR'], title='Percentage Change in Measurements: Scenario 3 vs Scenario 1')
+    st.plotly_chart(fig3)
+
+    # Visualization of Categories for Scenario 3 vs Scenario 1
+    st.markdown("### Categories: Scenario 3 vs Scenario 1")
+    fig4 = px.histogram(change_sc3_sc1, x='Category', title='Number of Subjects in Each Category: Scenario 3 vs Scenario 1')
+    st.plotly_chart(fig4)
+    
 def load_data():
     """
     Load the data for the application.
