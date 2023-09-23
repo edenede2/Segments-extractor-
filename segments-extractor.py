@@ -287,7 +287,7 @@ def resilience_sustainability_page():
         for bin_index in high_threshold_bins:
             colors[bin_index, :] = 'red'
         
-        sns.heatmap(heatmap_data, annot=True, fmt='d', cmap=colors, ax=ax)
+        sns.heatmap(heatmap_data, annot=True, fmt='d', cmap='Blues', ax=ax)
         plt.title(f'Heatmap of HRV Categories vs {measure} Bins')
         plt.xlabel('HRV Category')
         plt.ylabel(f'{measure} Bins')
