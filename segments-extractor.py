@@ -159,15 +159,6 @@ def resilience_sustainability_page():
     # Filter only full (non-segmented) subjects
     full_data = data[data['Subjects'].str.startswith('Full_')]
     
-    # Calculate the mean HRV for each subject
-    mean_hrv = full_data.groupby('Subjects')[['RMSSD', 'SDNN']].mean().mean(axis=1)
-
-    # Define the threshold as the overall mean of the HRV values
-    hrv_threshold = mean_hrv.mean()
-
-    # Categorize subjects based on the HRV threshold
-    full_data['HRV_Category'] = mean_hrv.apply(lambda x: 'High' if x >= hrv_threshold else 'Low').reindex(full_data['Subjects']).reset_index(drop=True)
-
     threshold = st.slider("Set Threshold for Highlighting Significant Change (%)", min_value=0, max_value=100, value=10)
     
     # Allow user to select the measurement they want to visualize
@@ -180,8 +171,8 @@ def resilience_sustainability_page():
     change_sc2_sc1, change_sc3_sc1 = categorize_subjects(change_sc2_sc1, change_sc3_sc1, threshold)
     
     def plot_with_threshold(change_data, scenario, measurement, threshold):
-        # Define colors based on HRV_Category
-        colors = full_data.set_index('Subjects')['HRV_Category'].map({'High': 'red', 'Low': 'blue'}).reindex(change_data['Subjects']).reset_index(drop=True)
+        # Define colors based on threshold
+        colors = ['#d62728' if abs(val) > threshold else '#1f77b4' for val in change_data[measurement]]
         
         # Calculate the percentage of subjects under the threshold
         under_threshold_percentage = len(change_data[abs(change_data[measurement]) <= threshold]) / len(change_data) * 100
@@ -261,31 +252,8 @@ def resilience_sustainability_page():
     # Scenario 3 vs Scenario 1
     st.markdown(f"### Percentage Change in {measurement}: Scenario 3 vs Scenario 1")
     plot_with_threshold(change_sc3_sc1, "Scenario 3 vs Scenario 1", measurement, threshold)
-     # Scenario 2 vs Scenario 1
-    st.markdown(f"### Percentage Change in {measurement}: Scenario 2 vs Scenario 1")
-    plot_with_threshold(change_sc2_sc1, "Scenario 2 vs Scenario 1", measurement, threshold)
     
-    # Scenario 3 vs Scenario 1
-    st.markdown(f"### Percentage Change in {measurement}: Scenario 3 vs Scenario 1")
-    plot_with_threshold(change_sc3_sc1, "Scenario 3 vs Scenario 1", measurement, threshold)
-    
-    # Define bins for HRV and resilience values
-    hrv_bins = pd.cut(mean_hrv, bins=[0, hrv_threshold, mean_hrv.max()], labels=['Low', 'High'])
-    resilience_bins = pd.cut(change_sc2_sc1[measurement], bins=5)  # Adjust the number of bins as needed
 
-    # Create a DataFrame with HRV and resilience bins
-    binned_data = pd.DataFrame({'HRV': hrv_bins, 'Resilience': resilience_bins})
-
-    # Count the number of subjects in each 2D bin
-    heatmap_data = binned_data.groupby(['HRV', 'Resilience']).size().unstack(fill_value=0)
-   
-    # Plot heatmap
-    fig, ax = plt.subplots(figsize=(10, 6))
-    sns.heatmap(heatmap_data, cmap='viridis', annot=True, fmt='d', ax=ax)
-    plt.title('Heatmap of HRV vs Resilience')
-    st.pyplot(fig)
-    plt.close()
-    
 def load_data():
     """
     Load the data for the application.
