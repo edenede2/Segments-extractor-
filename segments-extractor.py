@@ -159,6 +159,24 @@ def resilience_sustainability_page():
     # Filter only full (non-segmented) subjects
     full_data = data[data['Subjects'].str.startswith('Full_')]
     
+    # Calculate the mean HRV values for each subject
+    mean_hrv_values = full_data.groupby('Subjects')[['SDNN', 'RMSSD', 'MHR']].mean().reset_index()
+    
+    # Define thresholds for categorization (you can modify these values)
+    sdnn_threshold = mean_hrv_values['SDNN'].mean()
+    rmssd_threshold = mean_hrv_values['RMSSD'].mean()
+    mhr_threshold = mean_hrv_values['MHR'].mean()
+    
+    # Categorize subjects based on the mean HRV values
+    mean_hrv_values['HRV_Category'] = np.where(
+        (mean_hrv_values['SDNN'] >= sdnn_threshold) & 
+        (mean_hrv_values['RMSSD'] >= rmssd_threshold) & 
+        (mean_hrv_values['MHR'] >= mhr_threshold), 'High', 'Low'
+    )
+    
+    # Merge the HRV category back to the full_data DataFrame
+    full_data = full_data.merge(mean_hrv_values[['Subjects', 'HRV_Category']], on='Subjects', how='left')
+    
     threshold = st.slider("Set Threshold for Highlighting Significant Change (%)", min_value=0, max_value=100, value=10)
     
     # Allow user to select the measurement they want to visualize
@@ -252,8 +270,37 @@ def resilience_sustainability_page():
     # Scenario 3 vs Scenario 1
     st.markdown(f"### Percentage Change in {measurement}: Scenario 3 vs Scenario 1")
     plot_with_threshold(change_sc3_sc1, "Scenario 3 vs Scenario 1", measurement, threshold)
+   
+    # Heatmap Visualization for SDNN
+    heatmap_data_sdnn = pd.crosstab(index=pd.cut(full_data['SDNN'], bins=5), columns=full_data['HRV_Category'])
+    fig, ax = plt.subplots(figsize=(10, 6))
+    sns.heatmap(heatmap_data_sdnn, annot=True, fmt='d', cmap='Blues', ax=ax)
+    plt.title('Heatmap of HRV Categories vs SDNN Bins')
+    plt.xlabel('HRV Category')
+    plt.ylabel('SDNN Bins')
+    st.pyplot(fig)
+    plt.close()
     
-
+    # Heatmap Visualization for RMSSD
+    heatmap_data_rmssd = pd.crosstab(index=pd.cut(full_data['RMSSD'], bins=5), columns=full_data['HRV_Category'])
+    fig, ax = plt.subplots(figsize=(10, 6))
+    sns.heatmap(heatmap_data_rmssd, annot=True, fmt='d', cmap='Blues', ax=ax)
+    plt.title('Heatmap of HRV Categories vs RMSSD Bins')
+    plt.xlabel('HRV Category')
+    plt.ylabel('RMSSD Bins')
+    st.pyplot(fig)
+    plt.close()
+    
+    # Heatmap Visualization for MHR
+    heatmap_data_mhr = pd.crosstab(index=pd.cut(full_data['MHR'], bins=5), columns=full_data['HRV_Category'])
+    fig, ax = plt.subplots(figsize=(10, 6))
+    sns.heatmap(heatmap_data_mhr, annot=True, fmt='d', cmap='Blues', ax=ax)
+    plt.title('Heatmap of HRV Categories vs MHR Bins')
+    plt.xlabel('HRV Category')
+    plt.ylabel('MHR Bins')
+    st.pyplot(fig)
+    plt.close()
+    
 def load_data():
     """
     Load the data for the application.
