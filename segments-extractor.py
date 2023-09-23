@@ -210,15 +210,14 @@ def resilience_sustainability_page():
         fig.update_layout(title_text=f'Percentage Change in {measurement}: {scenario}')
         st.plotly_chart(fig)
 
-    # Scenario 2 vs Scenario 1
+     # Scenario 2 vs Scenario 1
     st.markdown(f"### Percentage Change in {measurement}: Scenario 2 vs Scenario 1")
-    under_threshold_percentage = plot_with_threshold(change_sc2_sc1, "Scenario 2 vs Scenario 1", measurement, threshold)
-    st.write(f"Percentage of subjects under the threshold: {under_threshold_percentage:.2f}%")
-
+    plot_with_threshold(change_sc2_sc1, "Scenario 2 vs Scenario 1", measurement, threshold)
+    
     # Scenario 3 vs Scenario 1
     st.markdown(f"### Percentage Change in {measurement}: Scenario 3 vs Scenario 1")
-    under_threshold_percentage = plot_with_threshold(change_sc3_sc1, "Scenario 3 vs Scenario 1", measurement, threshold)
-    st.write(f"Percentage of subjects under the threshold: {under_threshold_percentage:.2f}%")
+    plot_with_threshold(change_sc3_sc1, "Scenario 3 vs Scenario 1", measurement, threshold)
+    
 
 def load_data():
     """
