@@ -168,7 +168,7 @@ def plot_resilience_scatter(full_data, threshold, red_subjects):
 
 
 def resilience_sustainability_page():
-    st.title("Resilience and Sustainability Analysis")
+    st.title("Resilience and Susceptible Analysis")
     
     # Load the data
     data = load_data()
