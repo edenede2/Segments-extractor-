@@ -149,6 +149,20 @@ def plot_full_data_swarm(data, measure, full_subject_categories=None):
     plt.title(f"Swarm plot of {measure} for Full Subjects")
     st.pyplot()
     plt.close()
+# Additional function to create the scatter plot on the Resilience Page
+def plot_resilience_scatter(full_data, threshold):
+    # Calculate the mean RMSSD and SDNN values for each full subject across all events
+    mean_values = full_data.groupby('Subjects')[['RMSSD', 'SDNN']].mean().reset_index()
+    
+    # Color the points based on whether the subject is above the resilience threshold or not
+    mean_values['color'] = mean_values.apply(lambda row: 'red' if max(row['RMSSD'], row['SDNN']) > threshold else 'blue', axis=1)
+    
+    # Create the scatter plot
+    fig = px.scatter(mean_values, x='SDNN', y='RMSSD', color='color', 
+                     color_discrete_map={'red': 'red', 'blue': 'blue'},
+                     labels={'SDNN': 'SDNN (Mean)', 'RMSSD': 'RMSSD (Mean)'})
+    st.plotly_chart(fig)
+
 
 def resilience_sustainability_page():
     st.title("Resilience and Sustainability Analysis")
@@ -271,6 +285,33 @@ def resilience_sustainability_page():
     st.markdown(f"### Percentage Change in {measurement}: Scenario 3 vs Scenario 1")
     plot_with_threshold(change_sc3_sc1, "Scenario 3 vs Scenario 1", measurement, threshold)
 
+        # After generating the percentage change plots, add the new scatter plot
+    threshold = st.slider("Set Threshold for Highlighting Significant Change (%)", min_value=0, max_value=100, value=10)
+    st.markdown("### Resilience Scatter Plot")
+    plot_resilience_scatter(full_data, threshold)
+    
+    # Move the affected/unaffected functionality to the bottom of the resilience page
+    st.markdown("## Categorize Subjects Based on Z-Score")
+    zscore_threshold = st.slider("Set Z-Score Threshold for Categorization", min_value=0.0, max_value=3.0, value=1.96)
+
+    # Calculate the difference in measurements between MAST and rest baseline for full subjects
+    mast_data = full_data[full_data['Events'] == 'MAST']
+    baseline_data = full_data[full_data['Events'] == 'rest baseline']
+    difference_data = mast_data.set_index('Subjects')[['RMSSD', 'SDNN']] - baseline_data.set_index('Subjects')[['RMSSD', 'SDNN']]
+    difference_data.reset_index(inplace=True)
+
+    # Calculate the z-score of the differences
+    difference_data['RMSSD_zscore'] = stats.zscore(difference_data['RMSSD'])
+    difference_data['SDNN_zscore'] = stats.zscore(difference_data['SDNN'])
+
+    # Categorize subjects as "affected" or "unaffected" based on the z-score threshold
+    difference_data['RMSSD_category'] = difference_data['RMSSD_zscore'].apply(lambda x: 'affected' if abs(x) > zscore_threshold else 'unaffected')
+    difference_data['SDNN_category'] = difference_data['SDNN_zscore'].apply(lambda x: 'affected' if abs(x) > zscore_threshold else 'unaffected')
+
+    # Display the categorized subjects
+    st.write("Categorized Subjects based on RMSSD:", difference_data[['Subjects', 'RMSSD_category']])
+    st.write("Categorized Subjects based on SDNN:", difference_data[['Subjects', 'SDNN_category']])
+
 def load_data():
     """
     Load the data for the application.
@@ -324,22 +365,6 @@ def main_page():
                 st.write("Log transformation has been reverted.")
             else:
                 st.warning("Unable to revert the log transformation. Please reload or re-upload the original data.")
-    
-    # Checkbox to show/hide categorized subjects
-    show_categorized_subjects = st.checkbox("Show Categorized Subjects (affected unaffected)", value=True)
-    
-    # Calculate and show categorized subjects only if the checkbox is checked
-    if show_categorized_subjects:
-        st.markdown("## Categorize Subjects Based on Z-Score")
-        zscore_threshold = st.slider("Set Z-Score Threshold for Categorization", min_value=0.0, max_value=3.0, value=1.96)
-
-        # Categorize subjects as "affected" or "unaffected" based on the z-score threshold
-        difference_data['RMSSD_category'] = difference_data['RMSSD_zscore'].apply(lambda x: 'affected' if abs(x) > zscore_threshold else 'unaffected')
-        difference_data['SDNN_category'] = difference_data['SDNN_zscore'].apply(lambda x: 'affected' if abs(x) > zscore_threshold else 'unaffected')
-
-        # Display the categorized subjects
-        st.write("Categorized Subjects based on RMSSD:", difference_data[['Subjects', 'RMSSD_category']])
-        st.write("Categorized Subjects based on SDNN:", difference_data[['Subjects', 'SDNN_category']])
     
 
     all_full_subjects = data[data['Subjects'].str.startswith('Full_')]['Subjects'].unique().tolist()
