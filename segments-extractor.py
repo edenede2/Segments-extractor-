@@ -285,8 +285,6 @@ def resilience_sustainability_page():
     st.markdown(f"### Percentage Change in {measurement}: Scenario 3 vs Scenario 1")
     plot_with_threshold(change_sc3_sc1, "Scenario 3 vs Scenario 1", measurement, threshold)
 
-        # After generating the percentage change plots, add the new scatter plot
-    threshold = st.slider("Set Threshold for Highlighting Significant Change (%)", min_value=0, max_value=100, value=10)
     st.markdown("### Resilience Scatter Plot")
     plot_resilience_scatter(full_data, threshold)
     
