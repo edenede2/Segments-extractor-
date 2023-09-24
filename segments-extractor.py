@@ -191,7 +191,7 @@ def resilience_sustainability_page():
     # Merge the HRV category back to the full_data DataFrame
     full_data = full_data.merge(mean_hrv_values[['Subjects', 'HRV_Category']], on='Subjects', how='left')
     
-    threshold = st.slider("Set Threshold for Highlighting Significant Change (%)", min_value=0, max_value=100, value=10)
+    threshold = st.slider("Set Threshold for Highlighting Significant Change (%)", min_value=0, max_value=100, value=10, key='resilience_threshold')
     
     # Allow user to select the measurement they want to visualize
     measurement = st.selectbox("Select Measurement:", ['RMSSD', 'SDNN', 'MHR'])
@@ -292,7 +292,7 @@ def resilience_sustainability_page():
     
     # Move the affected/unaffected functionality to the bottom of the resilience page
     st.markdown("## Categorize Subjects Based on Z-Score")
-    zscore_threshold = st.slider("Set Z-Score Threshold for Categorization", min_value=0.0, max_value=3.0, value=1.96)
+    zscore_threshold = st.slider("Set Z-Score Threshold for Categorization", min_value=0.0, max_value=3.0, value=1.96, key='zscore_threshold')
 
     # Calculate the difference in measurements between MAST and rest baseline for full subjects
     mast_data = full_data[full_data['Events'] == 'MAST']
