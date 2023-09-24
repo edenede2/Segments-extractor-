@@ -129,8 +129,14 @@ def plot_facet(data, subjects, events, measure):
     st.plotly_chart(fig)
     
 def plot_full_line_plot(data, measure):
-    fig = px.line(data, x='Events', y=measure, title=f"{measure} across Events for full subjects", hover_data=['Subjects', 'Events'])
-    st.plotly_chart(fig)
+    # Ensure there is variation in the data
+    if len(data[measure].unique()) > 1:
+        fig = px.line(data, x='Subjects', y=measure, color='Events',
+                      title=f"{measure} across Subjects for selected events", 
+                      hover_data=['Subjects', 'Events'])
+        st.plotly_chart(fig)
+    else:
+        st.warning(f"No variation in {measure} across Subjects for selected events.")
 
 
 
