@@ -129,8 +129,9 @@ def plot_facet(data, subjects, events, measure):
     st.plotly_chart(fig)
     
 def plot_full_line_plot(data, measure):
-    fig = px.line(data, x='Events', y=measure, color=data['Subjects'].map(full_subject_categories), title=f"{measure} across Events for full subjects", hover_data=['Subjects', 'Events'])
+    fig = px.line(data, x='Events', y=measure, title=f"{measure} across Events for full subjects", hover_data=['Subjects', 'Events'])
     st.plotly_chart(fig)
+
 
 
 def plot_full_data_bar(data, measure):
@@ -138,9 +139,7 @@ def plot_full_data_bar(data, measure):
     st.plotly_chart(fig)
 
 def plot_full_data_box(data, measure):
-    # Modify the box color based on full_subject_categories
-    fig = px.box(data, x='Events', y=measure, color=data['Subjects'].map(full_subject_categories),
-                 title=f"Box Plot of {measure} for Full Subjects")
+    fig = px.box(data, x='Events', y=measure, title=f"Box Plot of {measure} for Full Subjects")
     st.plotly_chart(fig)
 
 def plot_full_data_violin(data, measure):
@@ -148,8 +147,9 @@ def plot_full_data_violin(data, measure):
     st.plotly_chart(fig)
 
 def plot_full_data_histogram(data, measure):
-    fig = px.histogram(data, x=measure, color=data['Subjects'].map(full_subject_categories), title=f"Histogram of {measure} for Full Subjects")
+    fig = px.histogram(data, x=measure, title=f"Histogram of {measure} for Full Subjects")
     st.plotly_chart(fig)
+
 
 def plot_full_data_swarm(data, measure):
     plt.figure(figsize=(14, 7))
