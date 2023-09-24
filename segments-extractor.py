@@ -71,8 +71,7 @@ def plot_line(data, subjects, events, measure, lower_bound, upper_bound):
     if lower_bound and upper_bound:
         data_subset = data_subset[(data_subset[measure] >= lower_bound) & (data_subset[measure] <= upper_bound)]
     
-    fig = px.line(data_subset, x='Segments', y=measure, color='Events', line_dash='Subjects', 
-                  line_group=data_subset['Subjects'].map(subject_categories),  # Color based on category
+    fig = px.line(data_subset, x='Segments', y=measure, color='Events', line_dash='Subjects',
                   title=f"{measure} across Events for selected subjects", 
                   labels={'Segments': 'Segments', measure: measure}, 
                   hover_data=['Subjects', 'Events'])
@@ -103,6 +102,15 @@ def plot_violin(data, subjects, events, measure, x_var='Subjects', lower_bound=N
     st.plotly_chart(fig)
 
     
+def plot_violin(data, subjects, events, measure, x_var='Subjects', lower_bound=None, upper_bound=None):
+    data_subset = data[data['Subjects'].isin(subjects) & data['Events'].isin(events)]
+    
+    if lower_bound and upper_bound:
+        data_subset = data_subset[(data_subset[measure] >= lower_bound) & (data_subset[measure] <= upper_bound)]
+
+    fig = px.violin(data_subset, x=x_var, y=measure, box=True, points="all", hover_data=['Subjects', 'Events'])
+    st.plotly_chart(fig)
+
 def plot_swarm(data, subjects, events, measure, x_var='Subjects', lower_bound=None, upper_bound=None):
     data_subset = data[data['Subjects'].isin(subjects) & data['Events'].isin(events)]
     
@@ -110,7 +118,7 @@ def plot_swarm(data, subjects, events, measure, x_var='Subjects', lower_bound=No
         data_subset = data_subset[(data_subset[measure] >= lower_bound) & (data_subset[measure] <= upper_bound)]
 
     plt.figure(figsize=(14, 7))
-    sns.swarmplot(data=data_subset, x=x_var, y=measure, hue=data_subset['Subjects'].map(subject_categories))
+    sns.swarmplot(data=data_subset, x=x_var, y=measure)
     plt.title(f"Swarm plot of {measure} across {x_var}")
     st.pyplot()
     plt.close()
@@ -136,7 +144,7 @@ def plot_full_data_box(data, measure):
     st.plotly_chart(fig)
 
 def plot_full_data_violin(data, measure):
-    fig = px.violin(data, x='Events', y=measure, color=data['Subjects'].map(full_subject_categories), box=True, points="all", title=f"Violin Plot of {measure} for Full Subjects")
+    fig = px.violin(data, x='Events', y=measure, box=True, points="all", title=f"Violin Plot of {measure} for Full Subjects")
     st.plotly_chart(fig)
 
 def plot_full_data_histogram(data, measure):
@@ -145,7 +153,7 @@ def plot_full_data_histogram(data, measure):
 
 def plot_full_data_swarm(data, measure):
     plt.figure(figsize=(14, 7))
-    sns.swarmplot(data=data, x='Events', y=measure, hue=data['Subjects'].map(full_subject_categories))
+    sns.swarmplot(data=data, x='Events', y=measure)
     plt.title(f"Swarm plot of {measure} for Full Subjects")
     st.pyplot()
     plt.close()
