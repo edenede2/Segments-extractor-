@@ -149,19 +149,22 @@ def plot_full_data_swarm(data, measure, full_subject_categories=None):
     plt.title(f"Swarm plot of {measure} for Full Subjects")
     st.pyplot()
     plt.close()
+
 # Additional function to create the scatter plot on the Resilience Page
-def plot_resilience_scatter(full_data, threshold):
+def plot_resilience_scatter(full_data, threshold, red_subjects):
     # Calculate the mean RMSSD and SDNN values for each full subject across all events
     mean_values = full_data.groupby('Subjects')[['RMSSD', 'SDNN']].mean().reset_index()
     
-    # Color the points based on whether the subject is above the resilience threshold or not
-    mean_values['color'] = mean_values.apply(lambda row: 'red' if max(row['RMSSD'], row['SDNN']) > threshold else 'blue', axis=1)
+    # Color the points based on whether the subject is in the red_subjects list
+    mean_values['color'] = mean_values['Subjects'].apply(lambda x: 'red' if x in red_subjects else 'blue')
     
     # Create the scatter plot
     fig = px.scatter(mean_values, x='SDNN', y='RMSSD', color='color', 
                      color_discrete_map={'red': 'red', 'blue': 'blue'},
-                     labels={'SDNN': 'SDNN (Mean)', 'RMSSD': 'RMSSD (Mean)'})
+                     labels={'SDNN': 'SDNN (Mean)', 'RMSSD': 'RMSSD (Mean)'},
+                     hover_data=['Subjects'])  # Add Subjects to hover data
     st.plotly_chart(fig)
+
 
 
 def resilience_sustainability_page():
@@ -202,6 +205,14 @@ def resilience_sustainability_page():
     # Categorize full subjects based on the calculated percentage change
     change_sc2_sc1, change_sc3_sc1 = categorize_subjects(change_sc2_sc1, change_sc3_sc1, threshold)
     
+
+    # Identify the subjects that are marked red in the percentage change plots
+    red_subjects_sc2 = change_sc2_sc1[change_sc2_sc1[['RMSSD', 'SDNN', 'MHR']].apply(lambda x: abs(x) > threshold, axis=1).any(axis=1)]['Subjects'].tolist()
+    red_subjects_sc3 = change_sc3_sc1[change_sc3_sc1[['RMSSD', 'SDNN', 'MHR']].apply(lambda x: abs(x) > threshold, axis=1).any(axis=1)]['Subjects'].tolist()
+    
+    # Combine the lists and remove duplicates by converting to a set and back to a list
+    red_subjects = list(set(red_subjects_sc2 + red_subjects_sc3))
+
     def plot_with_threshold(change_data, scenario, measurement, threshold):
         # Define colors based on threshold
         colors = ['#d62728' if abs(val) > threshold else '#1f77b4' for val in change_data[measurement]]
@@ -286,7 +297,8 @@ def resilience_sustainability_page():
     plot_with_threshold(change_sc3_sc1, "Scenario 3 vs Scenario 1", measurement, threshold)
 
     st.markdown("### Resilience Scatter Plot")
-    plot_resilience_scatter(full_data, threshold)
+    #     Call the modified scatter plot function
+    plot_resilience_scatter(full_data, threshold, red_subjects)
     
     # Move the affected/unaffected functionality to the bottom of the resilience page
     st.markdown("## Categorize Subjects Based on Z-Score")
