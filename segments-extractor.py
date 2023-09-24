@@ -398,22 +398,21 @@ def main_page():
         lower_bound = st.number_input('Enter Lower Bound for Outliers', value=data[selected_measurements].quantile(0.20))
         upper_bound = st.number_input('Enter Upper Bound for Outliers', value=data[selected_measurements].quantile(0.80))
 
-    # Create subject_categories dictionary for segmented subjects
-    subject_categories = dict(zip(difference_data['Subjects'], difference_data['RMSSD_category']))
+
     # Pass subject_categories to the plotting functions
     if st.button("Generate Plot"):
         if selected_plot == "Line Plot":
-            plot_line(filtered_data, selected_segmented_subjects, selected_events, selected_measurements, lower_bound, upper_bound, subject_categories)
+            plot_line(filtered_data, selected_segmented_subjects, selected_events, selected_measurements, lower_bound, upper_bound)
         elif selected_plot == "(corrected) Line Plot 3d":
             plot_line_3d(filtered_data, selected_segmented_subjects, selected_events, selected_measurements, lower_bound, upper_bound)
         elif selected_plot == "Box Plot":
             plot_box(filtered_data, selected_segmented_subjects, selected_events, selected_measurements, x_var='Events', lower_bound=lower_bound, upper_bound=upper_bound)
         elif selected_plot == "Violin Plot":
-            plot_violin(filtered_data, selected_segmented_subjects, selected_events, selected_measurements, x_var='Events', lower_bound=lower_bound, upper_bound=upper_bound, subject_categories=subject_categories)
+            plot_violin(filtered_data, selected_segmented_subjects, selected_events, selected_measurements, x_var='Events', lower_bound=lower_bound, upper_bound=upper_bound)
         elif selected_plot == "Swarm Plot":
-            plot_swarm(filtered_data, selected_segmented_subjects, selected_events, selected_measurements, x_var='Events', lower_bound=lower_bound, upper_bound=upper_bound, subject_categories=subject_categories)
+            plot_swarm(filtered_data, selected_segmented_subjects, selected_events, selected_measurements, x_var='Events', lower_bound=lower_bound, upper_bound=upper_bound)
         elif selected_plot == "Facet Grid":
-            plot_facet(filtered_data, selected_segmented_subjects, selected_events, selected_measurements, subject_categories=subject_categories)
+            plot_facet(filtered_data, selected_segmented_subjects, selected_events, selected_measurements)
 
 
     st.markdown("## Visualization for non-segmented Data")
@@ -446,20 +445,19 @@ def main_page():
     filtered_full_data = full_data[full_data['Subjects'].isin(selected_full_subjects) & full_data['Events'].isin(selected_full_events)]
 
     
-    # Create full_subject_categories dictionary for non-segmented subjects
-    full_subject_categories = dict(zip(difference_data['Subjects'], difference_data['RMSSD_category']))
+
     # Pass full_subject_categories to the full data plotting functions
     if st.button("Generate Full Data Plot"):
         if selected_full_plot == "Box Plot":
-            plot_full_data_box(filtered_full_data, selected_full_measurement, full_subject_categories)
+            plot_full_data_box(filtered_full_data, selected_full_measurement)
         elif selected_full_plot == "Violin Plot":
-            plot_full_data_violin(filtered_full_data, selected_full_measurement, full_subject_categories)
+            plot_full_data_violin(filtered_full_data, selected_full_measurement)
         elif selected_full_plot == "Histogram":
-            plot_full_data_histogram(filtered_full_data, selected_full_measurement, full_subject_categories)
+            plot_full_data_histogram(filtered_full_data, selected_full_measurement)
         elif selected_full_plot == "Swarm Plot":
-            plot_full_data_swarm(filtered_full_data, selected_full_measurement, full_subject_categories)
+            plot_full_data_swarm(filtered_full_data, selected_full_measurement)
         elif selected_full_plot == "Plot Line":
-            plot_full_line_plot(filtered_full_data, selected_full_measurement, full_subject_categories)
+            plot_full_line_plot(filtered_full_data, selected_full_measurement)
 
 def main():
     st.sidebar.title("Navigation")
