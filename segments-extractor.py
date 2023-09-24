@@ -353,14 +353,6 @@ def main_page():
     mast_data = data[data['Events'] == 'MAST']
     baseline_data = data[data['Events'] == 'rest baseline']
 
-    # Calculate the difference in measurements between MAST and rest baseline
-    difference_data = mast_data.set_index('Subjects')[['RMSSD', 'SDNN']] - baseline_data.set_index('Subjects')[['RMSSD', 'SDNN']]
-    difference_data.reset_index(inplace=True)
-
-    # Calculate the z-score of the differences
-    difference_data['RMSSD_zscore'] = stats.zscore(difference_data['RMSSD'])
-    difference_data['SDNN_zscore'] = stats.zscore(difference_data['SDNN'])
-
     st.write(data.head())
     
     st.markdown("## Transform Segment Data")
