@@ -222,21 +222,21 @@ def resilience_sustainability_page():
     red_subjects = list(set(red_subjects_sc2))
 
 
-    def plot_with_threshold(change_data, scenario, measurement, threshold):
+    def plot_with_threshold(change_selected_events, scenario, measurement, threshold):
         # Define colors based on threshold
-        colors = ['#d62728' if abs(val) > threshold else '#1f77b4' for val in change_data[measurement]]
+        colors = ['#d62728' if abs(val) > threshold else '#1f77b4' for val in change_selected_events[measurement]]
         
         # Calculate the percentage of subjects under the threshold
-        under_threshold_percentage = len(change_data[abs(change_data[measurement]) <= threshold]) / len(change_data) * 100
+        under_threshold_percentage = len(change_selected_events[abs(change_data[measurement]) <= threshold]) / len(change_selected_events) * 100
         
         fig = sp.make_subplots(rows=1, cols=2, subplot_titles=("Scatter Plot", "Bar Plot"))
         
         # Scatter plot
-        scatter_trace = go.Scatter(x=change_data['Subjects'], y=change_data[measurement], mode='markers', marker=dict(color=colors))
+        scatter_trace = go.Scatter(x=change_selected_events['Subjects'], y=change_selected_events[measurement], mode='markers', marker=dict(color=colors))
         fig.add_trace(scatter_trace, row=1, col=1)
         
         # Bar plot
-        bar_trace = go.Bar(x=change_data['Subjects'], y=change_data[measurement], marker=dict(color=colors))
+        bar_trace = go.Bar(x=change_selected_events['Subjects'], y=change_selected_events[measurement], marker=dict(color=colors))
         fig.add_trace(bar_trace, row=1, col=2)
         
         # Add annotation with percentage under the threshold
@@ -259,8 +259,8 @@ def resilience_sustainability_page():
             y1 = fig.layout.yaxis.range[1]
             y0 = fig.layout.yaxis.range[0]
         else:
-            y1 = max(change_data[measurement])
-            y0 = min(change_data[measurement])
+            y1 = max(change_selected_events[measurement])
+            y0 = min(change_selected_events[measurement])
         
         # Re-add reference line after adding annotation to ensure it's visible
         for col in range(1, 3):
@@ -299,7 +299,7 @@ def resilience_sustainability_page():
 
      # Percentage Change in selected_measurements: event2 vs event1
     st.markdown(f"### Percentage Change in {measurement}: {event2} vs {event1}")
-    plot_with_threshold(change_data, f"{event2} vs {event1}", measurement, threshold)
+    plot_with_threshold(change_selected_events, f"{event2} vs {event1}", measurement, threshold)
 
     st.markdown("### Resilience Scatter Plot")
     #     Call the modified scatter plot function
