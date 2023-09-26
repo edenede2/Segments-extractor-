@@ -227,7 +227,7 @@ def resilience_sustainability_page():
         colors = ['#d62728' if abs(val) > threshold else '#1f77b4' for val in change_selected_events[measurement]]
         
         # Calculate the percentage of subjects under the threshold
-        under_threshold_percentage = len(change_selected_events[abs(change_data[measurement]) <= threshold]) / len(change_selected_events) * 100
+        under_threshold_percentage = len(change_selected_events[abs(change_selected_events[measurement]) <= threshold]) / len(change_selected_events) * 100
         
         fig = sp.make_subplots(rows=1, cols=2, subplot_titles=("Scatter Plot", "Bar Plot"))
         
