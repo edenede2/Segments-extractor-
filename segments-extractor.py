@@ -161,7 +161,7 @@ def plot_resilience_scatter(full_data, threshold, red_subjects):
     mean_values = full_data.groupby('Subjects')[['RMSSD', 'SDNN']].mean().reset_index()
     
     # Color the points based on whether the subject is in the red_subjects or orange_subjects list
-    mean_values['color'] = mean_values['Subjects'].apply(lambda x: 'red' if x in red_subjects)
+    mean_values['color'] = mean_values['Subjects'].apply(lambda x: 'red' if x in red_subjects else 'blue')
     
     # Create the scatter plot
     fig = px.scatter(mean_values, x='SDNN', y='RMSSD', color='color', 
