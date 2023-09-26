@@ -188,7 +188,10 @@ def resilience_sustainability_page():
     
     # Filter only full (non-segmented) subjects
     full_data = data[data['Subjects'].str.startswith('Full_')]
-
+    
+    # Define all_events within the resilience_sustainability_page function
+    all_events = full_data['Events'].unique().tolist()
+    
     # Allow user to select the events they want to compare
     event1 = st.selectbox("Select the first event (baseline):", all_events, index=all_events.index('rest baseline') if 'rest baseline' in all_events else 0)
     event2 = st.selectbox("Select the second event (comparison):", all_events, index=all_events.index('MAST') if 'MAST' in all_events else 1)
