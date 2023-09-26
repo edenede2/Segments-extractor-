@@ -25,6 +25,8 @@ def calculate_percentage_change_for_selected_events(data, event1, event2, thresh
     event1_data = data[data['Events'] == event1]
     event2_data = data[data['Events'] == event2]
 
+    
+
     change_data = ((event2_data.set_index('Subjects')[['RMSSD', 'SDNN', 'MHR']] - event1_data.set_index('Subjects')[['RMSSD', 'SDNN', 'MHR']]) / event1_data.set_index('Subjects')[['RMSSD', 'SDNN', 'MHR']]) * 100
     change_data.reset_index(inplace=True)
 
@@ -91,16 +93,6 @@ def plot_box(data, subjects, events, measure, x_var='Subjects', lower_bound=None
         
     fig.update_layout(title=f"Box plot of {measure} across {x_var}", xaxis_title=x_var, yaxis_title=measure)
     st.plotly_chart(fig)
-    
-def plot_violin(data, subjects, events, measure, x_var='Subjects', lower_bound=None, upper_bound=None):
-    data_subset = data[data['Subjects'].isin(subjects) & data['Events'].isin(events)]
-    
-    if lower_bound and upper_bound:
-        data_subset = data_subset[(data_subset[measure] >= lower_bound) & (data_subset[measure] <= upper_bound)]
-
-    fig = px.violin(data_subset, x=x_var, y=measure, color=data_subset['Subjects'].map(subject_categories), box=True, points="all", hover_data=['Subjects', 'Events'])
-    st.plotly_chart(fig)
-
     
 def plot_violin(data, subjects, events, measure, x_var='Subjects', lower_bound=None, upper_bound=None):
     data_subset = data[data['Subjects'].isin(subjects) & data['Events'].isin(events)]
@@ -224,14 +216,9 @@ def resilience_sustainability_page():
     # Allow user to select the measurement they want to visualize
     measurement = st.selectbox("Select Measurement:", ['RMSSD', 'SDNN', 'MHR'])
 
-    # Calculate percentage change for selected events
-    change_data = calculate_percentage_change(full_data, event1, event2)
-    
 
     # Identify the subjects that are marked red in the percentage change plots
-    red_subjects_sc2 = change_sc2_sc1[change_sc2_sc1[['RMSSD', 'SDNN', 'MHR']].apply(lambda x: abs(x) > threshold, axis=1).any(axis=1)]['Subjects'].tolist()
-    red_subjects_sc3 = change_sc3_sc1[change_sc3_sc1[['RMSSD', 'SDNN', 'MHR']].apply(lambda x: abs(x) > threshold, axis=1).any(axis=1)]['Subjects'].tolist()
-
+    red_subjects_sc2 = change_selected_events[change_selected_events[['RMSSD', 'SDNN', 'MHR']].apply(lambda x: abs(x) > threshold, axis=1).any(axis=1)]['Subjects'].tolist()
     # Subjects that show change in both scenarios 1-2 and 1-3 are marked as red
     red_subjects = list(set(red_subjects_sc2) & set(red_subjects_sc3))
 
