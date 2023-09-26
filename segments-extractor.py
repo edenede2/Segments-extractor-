@@ -33,10 +33,10 @@ def calculate_percentage_change_for_selected_events(data, event1, event2, thresh
 
 
 
-def categorize_subjects(event1, event2, threshold):
-    change_e2_e1['Category'] = change_e2_e1[['RMSSD', 'SDNN', 'MHR']].apply(lambda row: 'resilient' if max(abs(row)) <= threshold else 'sustainable', axis=1)    
-   
-    return change_e2_e1
+def categorize_subjects(change_data, threshold):
+    change_data['Category'] = change_data[['RMSSD', 'SDNN', 'MHR']].apply(lambda row: 'resilient' if max(abs(row)) <= threshold else 'sustainable', axis=1)
+    return change_data
+
 
 def plot_line_3d(data, subjects, events, measure, lower_bound, upper_bound):
     data_subset = data[data['Subjects'].isin(subjects) & data['Events'].isin(events)]
@@ -184,7 +184,7 @@ def plot_resilience_scatter(full_data, threshold, red_subjects, orange_subjects)
 def resilience_sustainability_page():
     st.title("Resilience and Susceptible Analysis")
     
-    # Load the data
+        # Load the data
     data = load_data()
     
     # Filter only full (non-segmented) subjects
@@ -196,7 +196,10 @@ def resilience_sustainability_page():
     # Allow user to select the events they want to compare
     event1 = st.selectbox("Select the first event (baseline):", all_events, index=all_events.index('rest baseline') if 'rest baseline' in all_events else 0)
     event2 = st.selectbox("Select the second event (comparison):", all_events, index=all_events.index('MAST') if 'MAST' in all_events else 1)
-
+    
+    # Define threshold before calling calculate_percentage_change_for_selected_events
+    threshold = st.slider("Set Threshold for Highlighting Significant Change (%)", min_value=0, max_value=100, value=10, key='resilience_threshold')
+    
     # Calculate the percentage change for the selected events
     change_selected_events = calculate_percentage_change_for_selected_events(full_data, event1, event2, threshold)
     
@@ -217,9 +220,7 @@ def resilience_sustainability_page():
     
     # Merge the HRV category back to the full_data DataFrame
     full_data = full_data.merge(mean_hrv_values[['Subjects', 'HRV_Category']], on='Subjects', how='left')
-    
-    threshold = st.slider("Set Threshold for Highlighting Significant Change (%)", min_value=0, max_value=100, value=10, key='resilience_threshold')
-    
+        
     # Allow user to select the measurement they want to visualize
     measurement = st.selectbox("Select Measurement:", ['RMSSD', 'SDNN', 'MHR'])
 
