@@ -20,22 +20,23 @@ def transform_to_log(data, measurements):
 
 
 
-def calculate_percentage_change(data, event1, event2):
-    
+def calculate_percentage_change_for_selected_events(data, event1, event2, threshold):
+  
     event1_data = data[data['Events'] == event1]
     event2_data = data[data['Events'] == event2]
 
     change_data = ((event2_data.set_index('Subjects')[['RMSSD', 'SDNN', 'MHR']] - event1_data.set_index('Subjects')[['RMSSD', 'SDNN', 'MHR']]) / event1_data.set_index('Subjects')[['RMSSD', 'SDNN', 'MHR']]) * 100
     change_data.reset_index(inplace=True)
-    
+
+    change_data = categorize_subjects(change_data, threshold)
     return change_data
 
 
-def categorize_subjects(change_sc2_sc1, change_sc3_sc1, threshold):
-    change_sc2_sc1['Category'] = change_sc2_sc1[['RMSSD', 'SDNN', 'MHR']].apply(lambda row: 'resilient' if max(abs(row)) <= threshold else 'sustainable', axis=1)
-    change_sc3_sc1['Category'] = change_sc3_sc1[['RMSSD', 'SDNN', 'MHR']].apply(lambda row: 'resilient' if max(abs(row)) <= threshold else 'sustainable', axis=1)
-    
-    return change_sc2_sc1, change_sc3_sc1
+
+def categorize_subjects(event1, event2, threshold):
+    change_e2_e1['Category'] = change_e2_e1[['RMSSD', 'SDNN', 'MHR']].apply(lambda row: 'resilient' if max(abs(row)) <= threshold else 'sustainable', axis=1)    
+   
+    return change_e2_e1
 
 def plot_line_3d(data, subjects, events, measure, lower_bound, upper_bound):
     data_subset = data[data['Subjects'].isin(subjects) & data['Events'].isin(events)]
