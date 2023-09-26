@@ -219,11 +219,8 @@ def resilience_sustainability_page():
 
     # Identify the subjects that are marked red in the percentage change plots
     red_subjects_sc2 = change_selected_events[change_selected_events[['RMSSD', 'SDNN', 'MHR']].apply(lambda x: abs(x) > threshold, axis=1).any(axis=1)]['Subjects'].tolist()
-    # Subjects that show change in both scenarios 1-2 and 1-3 are marked as red
-    red_subjects = list(set(red_subjects_sc2) & set(red_subjects_sc3))
+    red_subjects = list(set(red_subjects_sc2))
 
-    # Subjects that show change only in scenario 1-2 are marked as orange
-    orange_subjects = list(set(red_subjects_sc2) - set(red_subjects_sc3))
 
     def plot_with_threshold(change_data, scenario, measurement, threshold):
         # Define colors based on threshold
@@ -306,7 +303,7 @@ def resilience_sustainability_page():
 
     st.markdown("### Resilience Scatter Plot")
     #     Call the modified scatter plot function
-    plot_resilience_scatter(full_data, threshold, red_subjects, orange_subjects)
+    plot_resilience_scatter(full_data, threshold, red_subjects)
 
     
     # Move the affected/unaffected functionality to the bottom of the resilience page
