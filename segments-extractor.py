@@ -20,18 +20,16 @@ def transform_to_log(data, measurements):
 
 
 
-def calculate_percentage_change(data):
-    scenario1_data = data[data['Events'] == 'scenario 1']
-    scenario2_data = data[data['Events'] == 'scenario 2']
-    scenario3_data = data[data['Events'] == 'scenario 3']
-
-    change_sc2_sc1 = ((scenario2_data.set_index('Subjects')[['RMSSD', 'SDNN', 'MHR']] - scenario1_data.set_index('Subjects')[['RMSSD', 'SDNN', 'MHR']]) / scenario1_data.set_index('Subjects')[['RMSSD', 'SDNN', 'MHR']]) * 100
-    change_sc3_sc1 = ((scenario3_data.set_index('Subjects')[['RMSSD', 'SDNN', 'MHR']] - scenario1_data.set_index('Subjects')[['RMSSD', 'SDNN', 'MHR']]) / scenario1_data.set_index('Subjects')[['RMSSD', 'SDNN', 'MHR']]) * 100
-
-    change_sc2_sc1.reset_index(inplace=True)
-    change_sc3_sc1.reset_index(inplace=True)
+def calculate_percentage_change(data, event1, event2):
     
-    return change_sc2_sc1, change_sc3_sc1
+    event1_data = data[data['Events'] == event1]
+    event2_data = data[data['Events'] == event2]
+
+    change_data = ((event2_data.set_index('Subjects')[['RMSSD', 'SDNN', 'MHR']] - event1_data.set_index('Subjects')[['RMSSD', 'SDNN', 'MHR']]) / event1_data.set_index('Subjects')[['RMSSD', 'SDNN', 'MHR']]) * 100
+    change_data.reset_index(inplace=True)
+    
+    return change_data
+
 
 def categorize_subjects(change_sc2_sc1, change_sc3_sc1, threshold):
     change_sc2_sc1['Category'] = change_sc2_sc1[['RMSSD', 'SDNN', 'MHR']].apply(lambda row: 'resilient' if max(abs(row)) <= threshold else 'sustainable', axis=1)
@@ -190,6 +188,10 @@ def resilience_sustainability_page():
     
     # Filter only full (non-segmented) subjects
     full_data = data[data['Subjects'].str.startswith('Full_')]
+
+    # Allow user to select the events they want to compare
+    event1 = st.selectbox("Select the first event (baseline):", all_events, index=all_events.index('rest baseline') if 'rest baseline' in all_events else 0)
+    event2 = st.selectbox("Select the second event (comparison):", all_events, index=all_events.index('MAST') if 'MAST' in all_events else 1)
     
     # Calculate the mean HRV values for each subject
     mean_hrv_values = full_data.groupby('Subjects')[['SDNN', 'RMSSD', 'MHR']].mean().reset_index()
@@ -214,11 +216,8 @@ def resilience_sustainability_page():
     # Allow user to select the measurement they want to visualize
     measurement = st.selectbox("Select Measurement:", ['RMSSD', 'SDNN', 'MHR'])
 
-    # Calculate percentage change for full subjects only
-    change_sc2_sc1, change_sc3_sc1 = calculate_percentage_change(full_data)
-    
-    # Categorize full subjects based on the calculated percentage change
-    change_sc2_sc1, change_sc3_sc1 = categorize_subjects(change_sc2_sc1, change_sc3_sc1, threshold)
+    # Calculate percentage change for selected events
+    change_data = calculate_percentage_change(full_data, event1, event2)
     
 
     # Identify the subjects that are marked red in the percentage change plots
@@ -306,13 +305,9 @@ def resilience_sustainability_page():
         fig.update_layout(title_text=f'Percentage Change in {measurement}: {scenario}')
         st.plotly_chart(fig)
 
-     # Scenario 2 vs Scenario 1
-    st.markdown(f"### Percentage Change in {measurement}: Scenario 2 vs Scenario 1")
-    plot_with_threshold(change_sc2_sc1, "Scenario 2 vs Scenario 1", measurement, threshold)
-    
-    # Scenario 3 vs Scenario 1
-    st.markdown(f"### Percentage Change in {measurement}: Scenario 3 vs Scenario 1")
-    plot_with_threshold(change_sc3_sc1, "Scenario 3 vs Scenario 1", measurement, threshold)
+     # Percentage Change in selected_measurements: event2 vs event1
+    st.markdown(f"### Percentage Change in {measurement}: {event2} vs {event1}")
+    plot_with_threshold(change_data, f"{event2} vs {event1}", measurement, threshold)
 
     st.markdown("### Resilience Scatter Plot")
     #     Call the modified scatter plot function
