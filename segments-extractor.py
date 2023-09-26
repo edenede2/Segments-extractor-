@@ -72,7 +72,7 @@ def plot_line(data, subjects, events, measure, lower_bound, upper_bound):
     if lower_bound and upper_bound:
         data_subset = data_subset[(data_subset[measure] >= lower_bound) & (data_subset[measure] <= upper_bound)]
     
-    fig = px.line(data_subset, x='Segments', y=measure, color='Events', line_dash='Subjects',
+    fig = px.line(data_subset, x='Segments', y=measure, color='Subjects', line_dash='Events',
                   title=f"{measure} across Events for selected subjects", 
                   labels={'Segments': 'Segments', measure: measure}, 
                   hover_data=['Subjects', 'Events'])
@@ -480,11 +480,11 @@ def main_page():
 
 def main():
     st.sidebar.title("Navigation")
-    page = st.sidebar.radio("Go to", ["Main Page", "Resilience and Sustainability Analysis"])
+    page = st.sidebar.radio("Go to", ["Main Page", "Resilience and Susceptible Analysis"])
     
     if page == "Main Page":
         main_page()
-    elif page == "Resilience and Sustainability Analysis":
+    elif page == "Resilience and Susceptible Analysis":
         resilience_sustainability_page()
 
 if __name__ == "__main__":
