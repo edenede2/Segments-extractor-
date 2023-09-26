@@ -195,6 +195,9 @@ def resilience_sustainability_page():
     # Allow user to select the events they want to compare
     event1 = st.selectbox("Select the first event (baseline):", all_events, index=all_events.index('rest baseline') if 'rest baseline' in all_events else 0)
     event2 = st.selectbox("Select the second event (comparison):", all_events, index=all_events.index('MAST') if 'MAST' in all_events else 1)
+
+    # Calculate the percentage change for the selected events
+    change_selected_events = calculate_percentage_change_for_selected_events(full_data, event1, event2, threshold)
     
     # Calculate the mean HRV values for each subject
     mean_hrv_values = full_data.groupby('Subjects')[['SDNN', 'RMSSD', 'MHR']].mean().reset_index()
