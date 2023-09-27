@@ -178,6 +178,33 @@ def plot_resilience_scatter(change_data1, threshold1, change_data2, threshold2, 
                      color_discrete_map={'red': 'red', 'yellow': 'yellow', 'orange': 'orange', 'blue': 'blue'},
                      labels={'x': f'{measure1} (Percentage Change)', 'y': f'{measure2} (Percentage Change)'},
                      hover_data=['Subjects'])
+
+    # Calculate Pearson correlation coefficient, r squared, slope, and intercept
+    corr_coefficient = np.corrcoef(plot_data['x'], plot_data['y'])[0, 1]
+    r_squared = corr_coefficient**2
+    slope, intercept, _, _, _ = linregress(plot_data['x'], plot_data['y'])
+    
+    # Add linear regression line to the scatter plot
+    x_reg_line = np.linspace(min(plot_data['x']), max(plot_data['x']), 100)
+    y_reg_line = slope * x_reg_line + intercept
+    fig.add_trace(go.Scatter(x=x_reg_line, y=y_reg_line, mode='lines', name='Regression Line', line=dict(color='black')))
+    
+    # Add annotations with Pearson correlation coefficient, r squared, slope, and intercept
+    fig.add_annotation(
+        text=f"r: {corr_coefficient:.2f}<br>r^2: {r_squared:.2f}<br>Slope: {slope:.2f}<br>Intercept: {intercept:.2f}",
+        xanchor='left',
+        x=0.05,
+        yanchor='top',
+        y=0.95,
+        showarrow=False,
+        font=dict(size=12, color='black'),
+        bgcolor='rgba(255, 255, 255, 0.8)',
+        bordercolor='black',
+        borderwidth=1,
+        borderpad=4,
+        xref='paper',
+        yref='paper'
+    )
     st.plotly_chart(fig)
 
 
