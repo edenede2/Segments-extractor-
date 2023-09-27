@@ -161,19 +161,17 @@ def plot_resilience_scatter(change_data1, threshold1, change_data2, threshold2, 
     # Identify subjects that are above the threshold in each bar plot
     red_subjects = change_data1[abs(change_data1[measure1]) > threshold1]['Subjects'].tolist()
     yellow_subjects = change_data2[abs(change_data2[measure2]) > threshold2]['Subjects'].tolist()
-    # Corrected Color Assignment Logic in plot_resilience_scatter
     orange_subjects = list(set(red_subjects) & set(yellow_subjects))
     blue_subjects = list(set(change_data1['Subjects'].unique()) - set(red_subjects) - set(yellow_subjects))
-    
-    plot_data['color'] = plot_data['Subjects'].apply(lambda subj: 'orange' if subj in orange_subjects else ('red' if subj in red_subjects else ('yellow' if subj in yellow_subjects else 'blue')))
+        
     # Assign colors based on the updated logic
     plot_data = pd.DataFrame({
         'Subjects': change_data1['Subjects'],
         'x': change_data1[measure1],
         'y': change_data2[measure2],
-        'color': ['red' if subj in red_subjects else 'yellow' if subj in yellow_subjects else 'orange' if subj in orange_subjects else 'blue' for subj in change_data1['Subjects']]
     })
-
+    
+    plot_data['color'] = plot_data['Subjects'].apply(lambda subj: 'orange' if subj in orange_subjects else ('red' if subj in red_subjects else ('yellow' if subj in yellow_subjects else 'blue')))
 
     # Create the scatter plot
     fig = px.scatter(plot_data, x='x', y='y', color='color', 
@@ -181,6 +179,7 @@ def plot_resilience_scatter(change_data1, threshold1, change_data2, threshold2, 
                      labels={'x': f'{measure1} (Percentage Change)', 'y': f'{measure2} (Percentage Change)'},
                      hover_data=['Subjects'])
     st.plotly_chart(fig)
+
 
 
 
