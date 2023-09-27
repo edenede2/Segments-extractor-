@@ -163,7 +163,7 @@ def plot_resilience_scatter(change_data1, threshold1, change_data2, threshold2, 
     yellow_subjects = change_data2[abs(change_data2[measure2]) > threshold2]['Subjects'].tolist()
     orange_subjects = list(set(red_subjects) & set(yellow_subjects))
     blue_subjects = list(set(change_data1['Subjects'].unique()) - set(red_subjects) - set(yellow_subjects))
-    
+        
     # Assign colors based on the updated logic
     plot_data = pd.DataFrame({
         'Subjects': change_data1['Subjects'],
@@ -245,10 +245,10 @@ def resilience_sustainability_page():
         red_subjects = change_data1[abs(change_data1[measurement1]) > threshold1]['Subjects'].tolist()
         yellow_subjects = change_data2[abs(change_data2[measurement2]) > threshold2]['Subjects'].tolist()
         orange_subjects = list(set(red_subjects) & set(yellow_subjects))
-        
+            
         colors1 = ['red' if subj in red_subjects else 'orange' if subj in orange_subjects else '#1f77b4' for subj in change_data1['Subjects']]
         colors2 = ['yellow' if subj in yellow_subjects else 'orange' if subj in orange_subjects else '#1f77b4' for subj in change_data2['Subjects']]
-        
+
         # Calculate the percentage of subjects under the threshold
         under_threshold_percentage1 = len(change_data1[abs(change_data1[measurement1]) <= threshold1]) / len(change_data1) * 100
         under_threshold_percentage2 = len(change_data2[abs(change_data2[measurement2]) <= threshold2]) / len(change_data2) * 100
