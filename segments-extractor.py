@@ -4,6 +4,7 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 import plotly.express as px
 import plotly.graph_objects as go
+from plotly.subplots import make_subplots
 import numpy as np
 import warnings
 warnings.filterwarnings("ignore", category=FutureWarning)
