@@ -9,7 +9,10 @@ import numpy as np
 import warnings
 warnings.filterwarnings("ignore", category=FutureWarning)
 import scipy.stats as stats
+from scipy.stats import linregress
 import plotly.subplots as sp
+
+
 
 
 def transform_to_log(data, measurements):
