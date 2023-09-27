@@ -28,7 +28,7 @@ def calculate_percentage_change_for_selected_events(data, event1, event2, thresh
 
     
 
-    change_data = ((event2_data.set_index('Subjects')[['RMSSD', 'SDNN', 'MHR']] - event1_data.set_index('Subjects')[['RMSSD', 'SDNN', 'MHR']]) / event1_data.set_index('Subjects')[['RMSSD', 'SDNN', 'MHR']]) * 100
+    change_data = ((event2_data.set_index('Subjects')[['RMSSD', 'SDNN', 'MHR']] - event1_data.set_index('Subjects')[['RMSSD', 'SDNN', 'MHR']]) / event2_data.set_index('Subjects')[['RMSSD', 'SDNN', 'MHR']]) * 100
     change_data.reset_index(inplace=True)
 
     change_data = categorize_subjects(change_data, threshold)
@@ -199,13 +199,12 @@ def resilience_sustainability_page():
     
    # Existing User Inputs
     event1 = st.selectbox("Select the first event (baseline):", all_events, index=all_events.index('rest baseline') if 'rest baseline' in all_events else 0)
-    event2 = st.selectbox("Select the second event (comparison):", all_events, index=all_events.index('MAST') if 'MAST' in all_events else 1)
+    event2 = st.selectbox("Select the zero event (comparison):", all_events, index=all_events.index('MAST') if 'MAST' in all_events else 1)
     threshold = st.slider("Set Threshold for Highlighting Significant Change (%)", min_value=0, max_value=100, value=10, key='resilience_threshold')
 
     # New User Inputs
-    event3 = st.selectbox("Select the third event:", all_events, index=all_events.index('event3_default') if 'event3_default' in all_events else 0)
-    event4 = st.selectbox("Select the fourth event:", all_events, index=all_events.index('event4_default') if 'event4_default' in all_events else 1)
-    measurement2 = st.selectbox("Select Measurement for the second graph:", ['RMSSD', 'SDNN', 'MHR'])
+    event3 = st.selectbox("Select the second event:", all_events, index=all_events.index('event3_default') if 'event3_default' in all_events else 0)
+    event4 = st.selectbox("Select the zero event:", all_events, index=all_events.index('event4_default') if 'event4_default' in all_events else 1)
     threshold2 = st.slider("Set Threshold for Highlighting Significant Change for the second graph (%)", min_value=0, max_value=100, value=10, key='resilience_threshold2')
 
     # Calculate the percentage change for the selected events
@@ -234,7 +233,7 @@ def resilience_sustainability_page():
         
     # Allow user to select the measurement they want to visualize
     measurement = st.selectbox("Select Measurement:", ['RMSSD', 'SDNN', 'MHR'])
-
+    measurement2 = st.selectbox("Select Measurement for the second graph:", ['RMSSD', 'SDNN', 'MHR'])
 
     # Identify the subjects that are marked red in the percentage change plots
     red_subjects_sc2 = change_selected_events[change_selected_events[['RMSSD', 'SDNN', 'MHR']].apply(lambda x: abs(x) > threshold, axis=1).any(axis=1)]['Subjects'].tolist()
