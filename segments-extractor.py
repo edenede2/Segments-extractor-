@@ -156,19 +156,28 @@ def plot_full_data_swarm(data, measure):
     st.pyplot()
     plt.close()
 
-def plot_resilience_scatter(full_data, threshold, red_subjects):
-    # Calculate the mean RMSSD and SDNN values for each full subject across all events
-    mean_values = full_data.groupby('Subjects')[['RMSSD', 'SDNN']].mean().reset_index()
+def plot_resilience_scatter(change_data1, threshold1, change_data2, threshold2, measure1, measure2):
+    # Identify subjects that are above the threshold in each bar plot
+    red_subjects = change_data1[abs(change_data1[measure1]) > threshold1]['Subjects'].tolist()
+    yellow_subjects = change_data2[abs(change_data2[measure2]) > threshold2]['Subjects'].tolist()
+    orange_subjects = list(set(red_subjects) & set(yellow_subjects))
+    blue_subjects = list(set(change_data1['Subjects'].unique()) - set(red_subjects) - set(yellow_subjects))
     
-    # Color the points based on whether the subject is in the red_subjects or orange_subjects list
-    mean_values['color'] = mean_values['Subjects'].apply(lambda x: 'red' if x in red_subjects else 'blue')
-    
+    # Create a new DataFrame for plotting
+    plot_data = pd.DataFrame({
+        'Subjects': change_data1['Subjects'],
+        'x': change_data1[measure1],
+        'y': change_data2[measure2],
+        'color': ['red' if subj in red_subjects else 'yellow' if subj in yellow_subjects else 'orange' if subj in orange_subjects else 'blue' for subj in change_data1['Subjects']]
+    })
+
     # Create the scatter plot
-    fig = px.scatter(mean_values, x='SDNN', y='RMSSD', color='color', 
-                     color_discrete_map={'red': 'red', 'blue': 'blue'},
-                     labels={'SDNN': 'SDNN (Mean)', 'RMSSD': 'RMSSD (Mean)'},
-                     hover_data=['Subjects'])  # Add Subjects to hover data
+    fig = px.scatter(plot_data, x='x', y='y', color='color', 
+                     color_discrete_map={'red': 'red', 'yellow': 'yellow', 'orange': 'orange', 'blue': 'blue'},
+                     labels={'x': f'{measure1} (Percentage Change)', 'y': f'{measure2} (Percentage Change)'},
+                     hover_data=['Subjects'])
     st.plotly_chart(fig)
+
 
 
 
@@ -185,16 +194,23 @@ def resilience_sustainability_page():
     # Define all_events within the resilience_sustainability_page function
     all_events = full_data['Events'].unique().tolist()
     
-    # Allow user to select the events they want to compare
+   # Existing User Inputs
     event1 = st.selectbox("Select the first event (baseline):", all_events, index=all_events.index('rest baseline') if 'rest baseline' in all_events else 0)
     event2 = st.selectbox("Select the second event (comparison):", all_events, index=all_events.index('MAST') if 'MAST' in all_events else 1)
-    
-    # Define threshold before calling calculate_percentage_change_for_selected_events
     threshold = st.slider("Set Threshold for Highlighting Significant Change (%)", min_value=0, max_value=100, value=10, key='resilience_threshold')
-    
+
+    # New User Inputs
+    event3 = st.selectbox("Select the third event:", all_events, index=all_events.index('event3_default') if 'event3_default' in all_events else 0)
+    event4 = st.selectbox("Select the fourth event:", all_events, index=all_events.index('event4_default') if 'event4_default' in all_events else 1)
+    measurement2 = st.selectbox("Select Measurement for the second graph:", ['RMSSD', 'SDNN', 'MHR'])
+    threshold2 = st.slider("Set Threshold for Highlighting Significant Change for the second graph (%)", min_value=0, max_value=100, value=10, key='resilience_threshold2')
+
     # Calculate the percentage change for the selected events
     change_selected_events = calculate_percentage_change_for_selected_events(full_data, event1, event2, threshold)
     
+    # Calculate the percentage change for the selected events
+    change_selected_events2 = calculate_percentage_change_for_selected_events(full_data, event3, event4, threshold2)
+
     # Calculate the mean HRV values for each subject
     mean_hrv_values = full_data.groupby('Subjects')[['SDNN', 'RMSSD', 'MHR']].mean().reset_index()
     
@@ -222,26 +238,28 @@ def resilience_sustainability_page():
     red_subjects = list(set(red_subjects_sc2))
 
 
-    def plot_with_threshold(change_selected_events, scenario, measurement, threshold):
+    def plot_with_threshold(change_data1, scenario1, measurement1, threshold1, change_data2, scenario2, measurement2, threshold2):
         # Define colors based on threshold
-        colors = ['#d62728' if abs(val) > threshold else '#1f77b4' for val in change_selected_events[measurement]]
+        colors1 = ['#d62728' if abs(val) > threshold1 else '#1f77b4' for val in change_data1[measurement1]]
+        colors2 = ['#d62728' if abs(val) > threshold2 else '#1f77b4' for val in change_data2[measurement2]]
         
         # Calculate the percentage of subjects under the threshold
-        under_threshold_percentage = len(change_selected_events[abs(change_selected_events[measurement]) <= threshold]) / len(change_selected_events) * 100
+        under_threshold_percentage1 = len(change_data1[abs(change_data1[measurement1]) <= threshold1]) / len(change_data1) * 100
+        under_threshold_percentage2 = len(change_data2[abs(change_data2[measurement2]) <= threshold2]) / len(change_data2) * 100
         
-        fig = sp.make_subplots(rows=1, cols=2, subplot_titles=("Scatter Plot", "Bar Plot"))
+        fig = make_subplots(rows=1, cols=2, subplot_titles=(f"Bar Plot: {scenario1}", f"Bar Plot: {scenario2}"))
         
-        # Scatter plot
-        scatter_trace = go.Scatter(x=change_selected_events['Subjects'], y=change_selected_events[measurement], mode='markers', marker=dict(color=colors))
-        fig.add_trace(scatter_trace, row=1, col=1)
+        # Bar plot 1
+        bar_trace1 = go.Bar(x=change_data1['Subjects'], y=change_data1[measurement1], marker=dict(color=colors1))
+        fig.add_trace(bar_trace1, row=1, col=1)
         
-        # Bar plot
-        bar_trace = go.Bar(x=change_selected_events['Subjects'], y=change_selected_events[measurement], marker=dict(color=colors))
-        fig.add_trace(bar_trace, row=1, col=2)
+        # Bar plot 2
+        bar_trace2 = go.Bar(x=change_data2['Subjects'], y=change_data2[measurement2], marker=dict(color=colors2))
+        fig.add_trace(bar_trace2, row=1, col=2)
         
-        # Add annotation with percentage under the threshold
+        # Add annotations with percentage under the threshold
         fig.add_annotation(
-            text=f"{under_threshold_percentage:.2f}% under threshold",
+            text=f"{under_threshold_percentage1:.2f}% under threshold",
             xanchor='left',
             x=0,
             yanchor='top',
@@ -251,59 +269,39 @@ def resilience_sustainability_page():
             bgcolor='rgba(255, 255, 255, 0.8)',
             bordercolor='black',
             borderwidth=1,
-            borderpad=4
+            borderpad=4,
+            xref='x domain',
+            yref='y domain'
+        )
+        fig.add_annotation(
+            text=f"{under_threshold_percentage2:.2f}% under threshold",
+            xanchor='left',
+            x=1,
+            yanchor='top',
+            y=1.05,
+            showarrow=False,
+            font=dict(size=12, color='black'),
+            bgcolor='rgba(255, 255, 255, 0.8)',
+            bordercolor='black',
+            borderwidth=1,
+            borderpad=4,
+            xref='x2 domain',
+            yref='y2 domain'
         )
         
-        # Check if yaxis range is not None, otherwise set default values
-        if fig.layout.yaxis.range is not None:
-            y1 = fig.layout.yaxis.range[1]
-            y0 = fig.layout.yaxis.range[0]
-        else:
-            y1 = max(change_selected_events[measurement])
-            y0 = min(change_selected_events[measurement])
-        
-        # Re-add reference line after adding annotation to ensure it's visible
-        for col in range(1, 3):
-            fig.add_shape(
-                go.layout.Shape(
-                    type='rect',
-                    y0=threshold,
-                    y1=y1,
-                    xref='paper',
-                    x0=0,
-                    x1=1,
-                    fillcolor='rgba(255, 0, 0, 0.2)',
-                    layer='below',
-                    line_width=0
-                ),
-                row=1,
-                col=col
-            )
-            fig.add_shape(
-                go.layout.Shape(
-                    type='rect',
-                    y0=y0,
-                    y1=-threshold,
-                    xref='paper',
-                    x0=0,
-                    x1=1,
-                    fillcolor='rgba(255, 0, 0, 0.2)',
-                    layer='below',
-                    line_width=0
-                ),
-                row=1,
-                col=col
-            )
-        fig.update_layout(title_text=f'Percentage Change in {measurement}: {scenario}')
+        fig.update_layout(title_text=f'Percentage Change in Measurements')
         st.plotly_chart(fig)
 
-     # Percentage Change in selected_measurements: event2 vs event1
-    st.markdown(f"### Percentage Change in {measurement}: {event2} vs {event1}")
-    plot_with_threshold(change_selected_events, f"{event2} vs {event1}", measurement, threshold)
 
+     # Percentage Change in selected_measurements: event2 vs event1
+    st.markdown(f"### Percentage Change in {measurement}: {event2} vs {event1} , Percentage Change in {measurment}: {event4} vs {event3}")
+    # Plotting the two bar plots side by side
+    plot_with_threshold(change_selected_events, f"{event2} vs {event1}", measurement, threshold, change_selected_events2, f"{event4} vs {event3}", measurement2, threshold2)
+
+   # Scatter Plot
     st.markdown("### Resilience Scatter Plot")
-    #     Call the modified scatter plot function
-    plot_resilience_scatter(full_data, threshold, red_subjects)
+    plot_resilience_scatter(change_selected_events, threshold, change_selected_events2, threshold2, measurement, measurement2)
+
 
     
     # Move the affected/unaffected functionality to the bottom of the resilience page
