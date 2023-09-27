@@ -198,13 +198,13 @@ def resilience_sustainability_page():
     all_events = full_data['Events'].unique().tolist()
     
    # Existing User Inputs
-    event1 = st.selectbox("Select the first event (baseline):", all_events, index=all_events.index('rest baseline') if 'rest baseline' in all_events else 0)
-    event2 = st.selectbox("Select the zero event (comparison):", all_events, index=all_events.index('MAST') if 'MAST' in all_events else 1)
+    event1 = st.selectbox("Select the zero event (baseline):", all_events, index=all_events.index('rest baseline') if 'rest baseline' in all_events else 0)
+    event2 = st.selectbox("Select the first event (comparison):", all_events, index=all_events.index('MAST') if 'MAST' in all_events else 1)
     threshold = st.slider("Set Threshold for Highlighting Significant Change (%)", min_value=0, max_value=100, value=10, key='resilience_threshold')
 
     # New User Inputs
-    event3 = st.selectbox("Select the second event:", all_events, index=all_events.index('event3_default') if 'event3_default' in all_events else 0)
-    event4 = st.selectbox("Select the zero event:", all_events, index=all_events.index('event4_default') if 'event4_default' in all_events else 1)
+    event3 = st.selectbox("Select the zero event (baseline):", all_events, index=all_events.index('event3_default') if 'event3_default' in all_events else 0)
+    event4 = st.selectbox("Select the second event (comparison):", all_events, index=all_events.index('event4_default') if 'event4_default' in all_events else 1)
     threshold2 = st.slider("Set Threshold for Highlighting Significant Change for the second graph (%)", min_value=0, max_value=100, value=10, key='resilience_threshold2')
 
     # Calculate the percentage change for the selected events
