@@ -245,12 +245,12 @@ def resilience_sustainability_page():
         # Define colors based on threshold
         red_subjects = change_data1[abs(change_data1[measurement1]) > threshold1]['Subjects'].tolist()
         yellow_subjects = change_data2[abs(change_data2[measurement2]) > threshold2]['Subjects'].tolist()
-     
-        # Corrected Color Assignment Logic in plot_with_threshold
         orange_subjects = list(set(red_subjects) & set(yellow_subjects))
-        colors1 = ['orange' if subj in orange_subjects else ('red' if subj in red_subjects else ('#1f77b4' if subj not in yellow_subjects else 'yellow')) for subj in change_data1['Subjects']]
-        colors2 = ['orange' if subj in orange_subjects else ('yellow' if subj in yellow_subjects else ('#1f77b4' if subj not in red_subjects else 'red')) for subj in change_data2['Subjects']]
-
+        
+        # Assign colors for each bar plot separately
+        colors1 = ['orange' if subj in orange_subjects else 'red' if subj in red_subjects else '#1f77b4' for subj in change_data1['Subjects']]
+        colors2 = ['orange' if subj in orange_subjects else 'yellow' if subj in yellow_subjects else '#1f77b4' for subj in change_data2['Subjects']]
+    
         # Calculate the percentage of subjects under the threshold
         under_threshold_percentage1 = len(change_data1[abs(change_data1[measurement1]) <= threshold1]) / len(change_data1) * 100
         under_threshold_percentage2 = len(change_data2[abs(change_data2[measurement2]) <= threshold2]) / len(change_data2) * 100
@@ -299,6 +299,7 @@ def resilience_sustainability_page():
         
         fig.update_layout(title_text=f'Percentage Change in Measurements')
         st.plotly_chart(fig)
+
 
 
      # Percentage Change in selected_measurements: event2 vs event1
