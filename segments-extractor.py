@@ -179,7 +179,7 @@ def plot_resilience_scatter(change_data1, threshold1, change_data2, threshold2, 
     # Create the scatter plot
     fig = px.scatter(plot_data, x='x', y='y', color='color', 
                      color_discrete_map={'red': 'red', 'yellow': 'yellow', 'orange': 'orange', 'blue': 'blue'},
-                     labels={'x': f'{measure1} (Percentage Change)', 'y': f'{measure2} (Percentage Change)'},
+                     labels={'x': f'{measure1} 1 (Percentage Change)', 'y': f'{measure2} 2 (Percentage Change)'},
                      hover_data=['Subjects'])
 
     # Calculate Pearson correlation coefficient, r squared, slope, and intercept
