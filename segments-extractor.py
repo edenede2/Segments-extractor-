@@ -294,7 +294,7 @@ def resilience_sustainability_page():
 
 
      # Percentage Change in selected_measurements: event2 vs event1
-    st.markdown(f"### Percentage Change in {measurement}: {event2} vs {event1} , Percentage Change in {measurment}: {event4} vs {event3}")
+    st.markdown(f"### Percentage Change in {measurement}: {event2} vs {event1} , Percentage Change in {measurement2}: {event4} vs {event3}")
     # Plotting the two bar plots side by side
     plot_with_threshold(change_selected_events, f"{event2} vs {event1}", measurement, threshold, change_selected_events2, f"{event4} vs {event3}", measurement2, threshold2)
 
